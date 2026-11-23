@@ -1,0 +1,208 @@
+{
+  "id": "demo_b14",
+  "label": "B-14 合成点群",
+  "count": 365106,
+  "members": [
+    "rail",
+    "sleeper",
+    "ballast",
+    "deck",
+    "pier",
+    "abutment",
+    "ground",
+    "river"
+  ],
+  "units": "m",
+  "gauge_m": 1.067,
+  "bounds": {
+    "x": [
+      -29.994918823242188,
+      399.9953308105469
+    ],
+    "y": [
+      -31.999910354614258,
+      31.99938201904297
+    ],
+    "z": [
+      -3.3813440799713135,
+      8.891894340515137
+    ]
+  },
+  "scale": {
+    "status": "relative",
+    "basis": "synthetic B-14 model, gauge 1.067 m"
+  },
+  "note": "合成点群。相対形状はモデル通り、絶対標高・実測値ではありません。",
+  "views": [
+    {
+      "id": "view_01",
+      "file": "view_01.jpg",
+      "width": 1000,
+      "height": 700,
+      "fov": 48,
+      "eye": [
+        60,
+        -30,
+        18
+      ],
+      "target": [
+        110,
+        0,
+        8
+      ]
+    },
+    {
+      "id": "view_02",
+      "file": "view_02.jpg",
+      "width": 1000,
+      "height": 700,
+      "fov": 48,
+      "eye": [
+        160,
+        32,
+        20
+      ],
+      "target": [
+        130,
+        0,
+        8
+      ]
+    },
+    {
+      "id": "view_03",
+      "file": "view_03.jpg",
+      "width": 1000,
+      "height": 700,
+      "fov": 48,
+      "eye": [
+        260,
+        -26,
+        16
+      ],
+      "target": [
+        220,
+        0,
+        8
+      ]
+    },
+    {
+      "id": "view_04",
+      "file": "view_04.jpg",
+      "width": 1000,
+      "height": 700,
+      "fov": 48,
+      "eye": [
+        185,
+        0,
+        48
+      ],
+      "target": [
+        185,
+        0,
+        8
+      ]
+    },
+    {
+      "id": "view_05",
+      "file": "view_05.jpg",
+      "width": 1000,
+      "height": 700,
+      "fov": 48,
+      "eye": [
+        185,
+        -24,
+        12
+      ],
+      "target": [
+        185,
+        0,
+        8.8
+      ]
+    },
+    {
+      "id": "view_06",
+      "file": "view_06.jpg",
+      "width": 1000,
+      "height": 700,
+      "fov": 48,
+      "eye": [
+        330,
+        20,
+        18
+      ],
+      "target": [
+        270,
+        0,
+        8
+      ]
+    },
+    {
+      "id": "view_07",
+      "file": "view_07.jpg",
+      "width": 1000,
+      "height": 700,
+      "fov": 48,
+      "eye": [
+        25,
+        -22,
+        14
+      ],
+      "target": [
+        70,
+        0,
+        8
+      ]
+    },
+    {
+      "id": "view_08",
+      "file": "view_08.jpg",
+      "width": 1000,
+      "height": 700,
+      "fov": 48,
+      "eye": [
+        185,
+        24,
+        12
+      ],
+      "target": [
+        185,
+        0,
+        8.8
+      ]
+    },
+    {
+      "id": "view_09",
+      "file": "view_09.jpg",
+      "width": 1000,
+      "height": 700,
+      "fov": 48,
+      "eye": [
+        120,
+        -18,
+        10
+      ],
+      "target": [
+        120,
+        0,
+        8.7
+      ]
+    },
+    {
+      "id": "view_10",
+      "file": "view_10.jpg",
+      "width": 1000,
+      "height": 700,
+      "fov": 48,
+      "eye": [
+        250,
+        -18,
+        10
+      ],
+      "target": [
+        250,
+        0,
+        8.7
+      ]
+    }
+  ]
+}

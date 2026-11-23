@@ -1,0 +1,1495 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>軌道・構造物点検 確認アプリ（デモ）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --font-ui:"BIZ UDPGothic","Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic UI","Meiryo",system-ui,sans-serif;
+  --font-num:"Barlow Condensed","Arial Narrow","BIZ UDPGothic",sans-serif;
+  --bg:#E4E6E0; --surface:#F3F4F0; --surface-2:#E3E6DF; --surface-3:#CDD2C8;
+  --ink:#1D2328; --ink-2:#4B555D; --ink-3:#646D74; --line:#C2C8BE;
+  --accent:#1F4E79; --primary:#1F4E79; --primary-ink:#F3F6F9;
+  --teal:#23706B; --teal-ink:#F1F8F7;
+  --signal:#F2C200; --signal-ink:#241E00; --interp-bg:#FFF3BF;
+  --tunnel:#3A4249; --tunnel-ink:#EEF0EC;
+  --overlay:rgba(243,244,240,.9);
+  --h-AA:#7A1A10; --h-AA-ink:#FFF3F0;
+  --h-A1:#C2410C; --h-A1-ink:#FFF5EE;
+  --h-A2:#EFA24A; --h-A2-ink:#2B1600;
+  --h-B:#2F6EA8;  --h-B-ink:#F1F6FB;
+  --h-C:#9DBEDB;  --h-C-ink:#10263A;
+  --h-S:#C3CAD0;  --h-S-ink:#1D2328;
+  --pc-bg:#E9EBE6; --pc-ground:#A3A994; --pc-ground-2:#56634F; --pc-ballast:#77746C;
+  --pc-struct:#1F4E79; --pc-river:#4F86B8; --pc-rail:#1D2328; --pc-interp:#D9A800; --pc-sel:#1F4E79;
+  --heat-0:#E7E9E3; --heat-neg1:#EFA24A; --heat-neg2:#8A2E0E; --heat-pos:#2F6EA8;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#11171E; --surface:#18202A; --surface-2:#212B36; --surface-3:#2E3A46;
+    --ink:#E6E9E4; --ink-2:#B3BBC2; --ink-3:#8E98A1; --line:#34414D;
+    --accent:#8DB9E3; --primary:#3A73A7; --primary-ink:#F5F8FB;
+    --teal:#3F9C95; --teal-ink:#08201E;
+    --interp-bg:#3A3210; --tunnel:#4A545D; --tunnel-ink:#EEF0EC;
+    --overlay:rgba(24,32,42,.9);
+    --h-AA:#B33A2B; --h-S:#5B6670; --h-S-ink:#EEF0EC;
+    --pc-bg:#141B22; --pc-ground:#4F5A4B; --pc-ground-2:#A3AE97; --pc-ballast:#6E6B64;
+    --pc-struct:#7FAAD4; --pc-river:#3E77AA; --pc-rail:#DCE1DA; --pc-interp:#F2C200; --pc-sel:#8DB9E3;
+    --heat-0:#222C36; --heat-neg1:#A85B1E; --heat-neg2:#F6B27A; --heat-pos:#5B9BD5;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#11171E; --surface:#18202A; --surface-2:#212B36; --surface-3:#2E3A46;
+  --ink:#E6E9E4; --ink-2:#B3BBC2; --ink-3:#8E98A1; --line:#34414D;
+  --accent:#8DB9E3; --primary:#3A73A7; --primary-ink:#F5F8FB;
+  --teal:#3F9C95; --teal-ink:#08201E;
+  --interp-bg:#3A3210; --tunnel:#4A545D; --tunnel-ink:#EEF0EC;
+  --overlay:rgba(24,32,42,.9);
+  --h-AA:#B33A2B; --h-S:#5B6670; --h-S-ink:#EEF0EC;
+  --pc-bg:#141B22; --pc-ground:#4F5A4B; --pc-ground-2:#A3AE97; --pc-ballast:#6E6B64;
+  --pc-struct:#7FAAD4; --pc-river:#3E77AA; --pc-rail:#DCE1DA; --pc-interp:#F2C200; --pc-sel:#8DB9E3;
+  --heat-0:#222C36; --heat-neg1:#A85B1E; --heat-neg2:#F6B27A; --heat-pos:#5B9BD5;
+  color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 var(--font-ui);-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:31;background:var(--surface)}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--signal);outline-offset:2px}
+
+/* app bar */
+.appbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:var(--surface);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:22px;padding:10px 20px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:16px;white-space:nowrap}
+.brand svg{flex:none}
+.brand .tag{font-weight:400;font-size:12px;color:var(--ink-3);border:1px solid var(--line);border-radius:5px;padding:0 6px}
+.context{display:flex;flex-direction:column;line-height:1.35;font-size:13px;color:var(--ink-2)}
+.context b{color:var(--ink);font-size:14px}
+.context .km{font-size:16px}
+.tabs{margin-left:auto;display:flex;gap:3px;background:var(--surface-2);padding:4px;border-radius:10px}
+.tab{appearance:none;border:0;background:transparent;font-size:14px;padding:7px 15px;border-radius:7px;color:var(--ink-2);cursor:pointer}
+.tab[aria-selected="true"]{background:var(--surface);color:var(--ink);font-weight:700;box-shadow:0 1px 2px rgba(0,0,0,.14)}
+.demo-note{font-size:12.5px;color:var(--ink-3);padding:10px 20px 0;margin:0}
+
+.view{display:none}
+.view.is-active{display:block}
+.km{font-family:var(--font-num);font-weight:600;letter-spacing:.01em;font-variant-numeric:tabular-nums}
+
+/* inspect layout */
+.inspect{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,400px);gap:14px;padding:10px 20px 28px;align-items:start}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:12px}
+.map{grid-column:1;grid-row:1;position:relative;height:clamp(340px,56vh,620px);overflow:hidden;background:var(--pc-bg);border:1px solid var(--line);border-radius:12px}
+.map canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
+.map canvas:active{cursor:grabbing}
+.map-legend{position:absolute;left:12px;top:12px;background:var(--overlay);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:12.5px;display:grid;gap:3px;max-width:calc(100% - 24px)}
+.map-legend .ttl{font-weight:700;font-size:13px}
+.lg{display:flex;align-items:center;gap:8px}
+.sw{display:inline-block;flex:none}
+.sw-pts{width:16px;height:8px;background:radial-gradient(circle,var(--pc-ground-2) 1.2px,transparent 1.6px) 0 0/4px 4px}
+.sw-rail{width:16px;height:0;border-top:2px solid var(--pc-rail)}
+.sw-interp{width:16px;height:0;border-top:2px dashed var(--pc-interp)}
+.sw-dot{width:10px;height:10px;border-radius:50%;background:var(--h-A1)}
+.map-tools{position:absolute;right:12px;top:12px;display:flex;gap:6px}
+.map-hint{position:absolute;left:12px;bottom:10px;font-size:12px;color:var(--ink-3);background:var(--overlay);padding:2px 8px;border-radius:6px}
+.lbl3d{position:absolute;left:0;top:0;transform:translate(-50%,-100%);font-size:12px;line-height:1.4;padding:2px 8px;border-radius:6px;background:var(--overlay);border:1px solid var(--line);white-space:nowrap;pointer-events:none;will-change:transform}
+.lbl3d.interp{background:var(--interp-bg);border-color:var(--pc-interp)}
+.map-fallback{position:absolute;inset:0;display:none;align-items:center;justify-content:center;text-align:center;padding:24px;color:var(--ink-2)}
+.map.no3d .map-fallback{display:flex}
+
+.btn{appearance:none;font-size:14px;border:1px solid var(--line);background:var(--surface);color:var(--ink);padding:7px 13px;border-radius:8px;cursor:pointer;line-height:1.4}
+.btn:hover{background:var(--surface-2)}
+.btn-primary{background:var(--primary);color:var(--primary-ink);border-color:var(--primary)}
+.btn-primary:hover{background:var(--primary);filter:brightness(1.08)}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+
+/* strip */
+.strip-panel{grid-column:1;grid-row:2;padding:12px 14px 10px}
+.strip-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 18px;margin-bottom:6px}
+.strip-head h2{font-size:15px;margin:0}
+.strip-legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--ink-2)}
+.strip-legend .sw{width:18px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.sw-meas{background:var(--ink-2);opacity:.6}
+.sw-int{background:repeating-linear-gradient(45deg,var(--signal) 0 2px,var(--interp-bg) 2px 5px);outline:1px solid var(--pc-interp)}
+.strip-grid{display:grid;grid-template-columns:62px minmax(0,1fr)}
+.strip-labels{position:relative;height:132px;font-size:12px;color:var(--ink-3)}
+.strip-labels span{position:absolute;left:0;line-height:1.2}
+#strip{display:block;width:100%;height:132px;overflow:visible}
+#strip .sm{cursor:pointer}
+#strip .sm:focus{outline:none}
+#strip .sm:focus-visible circle.ring{stroke:var(--signal);stroke-width:3}
+
+/* side */
+.side{grid-column:2;grid-row:1 / span 2;overflow:hidden;display:flex;flex-direction:column;max-height:calc(clamp(340px,56vh,620px) + 214px)}
+.side-head{padding:14px 16px 12px;border-bottom:1px solid var(--line)}
+.side-head h2{font-size:16px;margin:0}
+.side-head p{margin:2px 0 0;font-size:12.5px;color:var(--ink-3)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:3px 12px;font-size:13px;cursor:pointer}
+.chip .n{font-family:var(--font-num);font-size:15px;font-weight:600;margin-left:5px}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.side-body{overflow:auto;flex:1;min-height:0}
+.cands{list-style:none;margin:0;padding:6px}
+.cand{display:flex;gap:12px;width:100%;text-align:left;background:transparent;border:0;border-radius:10px;padding:10px;cursor:pointer;align-items:flex-start}
+.cand:hover{background:var(--surface-2)}
+.cand.is-sel{background:var(--surface-2);box-shadow:inset 3px 0 0 var(--accent)}
+.cand-main{min-width:0}
+.cand .km{font-size:19px;line-height:1.1;display:block}
+.cand-title{display:block;font-weight:700;font-size:14.5px;line-height:1.45}
+.cand-meta{display:block;font-size:12.5px;color:var(--ink-3);line-height:1.5}
+.badge{flex:none;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;width:48px;height:48px;border-radius:9px;font-family:var(--font-num);font-weight:700;font-size:21px;line-height:1}
+.badge small{font-family:var(--font-ui);font-size:10px;font-weight:400;margin-top:4px;letter-spacing:0}
+.badge.is-ai{background:var(--surface);color:var(--ink);border:2px dashed var(--hc)}
+.badge.is-fixed{background:var(--hc);color:var(--hci);border:2px solid var(--hc)}
+
+/* detail */
+.detail{padding:10px 16px 20px}
+.linkbtn{appearance:none;border:0;background:none;padding:4px 0;color:var(--accent);cursor:pointer;font-size:13.5px}
+.d-head{display:flex;gap:14px;align-items:center;margin:6px 0 12px}
+.d-head .km{font-size:36px;line-height:1}
+.d-head h2{font-size:16.5px;margin:0;line-height:1.4}
+.d-head p{margin:2px 0 0;font-size:13px;color:var(--ink-2)}
+.compare{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.compare figure{margin:0}
+.compare figcaption{font-size:12px;color:var(--ink-3);margin-bottom:4px}
+.compare svg{width:100%;height:auto;border-radius:6px;display:block}
+.imgnote{font-size:11.5px;color:var(--ink-3);margin:5px 0 0}
+.box{margin-top:14px;padding:12px 14px;border-radius:10px;background:var(--surface-2)}
+.box h3{font-size:14px;margin:0 0 6px}
+.box p{margin:0;font-size:13.5px}
+.facts{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;margin:10px 0 0;font-size:13px}
+.facts dt{color:var(--ink-3)}
+.facts dd{margin:0}
+.trend svg{width:100%;height:auto;display:block}
+.judge{margin-top:16px}
+.judge h3{font-size:14px;margin:0 0 8px}
+.seg{display:grid;grid-template-columns:repeat(6,1fr);gap:4px}
+.seg button{font-family:var(--font-num);font-size:19px;font-weight:600;padding:7px 0 5px;border:1px solid var(--line);background:var(--surface);border-radius:8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;line-height:1.1}
+.seg button small{font-family:var(--font-ui);font-size:10px;font-weight:400;color:var(--ink-3);min-height:14px;margin-top:3px}
+.seg button[aria-pressed="true"]{background:var(--hc);color:var(--hci);border-color:var(--hc)}
+.seg button[aria-pressed="true"] small{color:inherit}
+.hint{font-size:12px;color:var(--ink-3);margin:6px 0 10px}
+.judge label{display:block;font-size:13px;color:var(--ink-2)}
+textarea{width:100%;font:inherit;font-size:14px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:var(--surface);color:var(--ink);min-height:62px;resize:vertical;margin-top:4px}
+.actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.state-line{font-size:13px;margin-top:10px;color:var(--ink-2)}
+
+/* plan */
+.plan{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(280px,1fr);gap:14px;padding:10px 20px 28px;align-items:start}
+.pad{padding:16px 18px}
+.pad h2{font-size:16px;margin:0 0 2px}
+.pad > p.sub{font-size:13px;color:var(--ink-3);margin:0 0 14px}
+.gantt{display:grid;grid-template-columns:minmax(150px,240px) minmax(0,1fr);row-gap:6px;font-size:13px}
+.g-label{padding-right:10px;line-height:1.35;align-self:center}
+.g-track{align-self:center;position:relative;height:30px;background:var(--surface-2);border-radius:6px}
+.g-window{position:absolute;top:0;bottom:0;background:repeating-linear-gradient(90deg,transparent 0 9px,rgba(127,140,150,.18) 9px 10px);border-left:2px solid var(--ink-3);border-right:2px solid var(--ink-3)}
+.g-bar{position:absolute;top:4px;bottom:4px;border-radius:5px;font-size:12px;display:flex;align-items:center;padding:0 6px;white-space:nowrap;overflow:hidden}
+.g-prep{background:var(--surface-3);color:var(--ink)}
+.g-video{background:var(--primary);color:var(--primary-ink)}
+.g-still{background:var(--ink-2);color:var(--surface)}
+.g-close{background:var(--teal);color:var(--teal-ink)}
+.g-over{box-shadow:0 0 0 2px var(--h-A1)}
+.g-axis{position:relative;height:22px;font-family:var(--font-num);font-size:14px;color:var(--ink-3)}
+.g-axis span{position:absolute;transform:translateX(-50%)}
+.g-legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--ink-2);margin-top:12px}
+.g-legend i{display:inline-block;width:14px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.warn{margin-top:12px;padding:10px 12px;border-radius:8px;border:1px solid var(--h-A1);font-size:13.5px;display:none}
+.warn.show{display:block}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12.5px;color:var(--ink-3);font-weight:400;white-space:nowrap}
+.check{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:8px;font-size:14px}
+.check li{display:flex;gap:10px;align-items:flex-start}
+.check li::before{content:"";flex:none;width:15px;height:15px;border:1.5px solid var(--ink-3);border-radius:3px;margin-top:3px}
+.mini{font-size:12.5px;color:var(--ink-3);margin:12px 0 0}
+
+/* priority */
+.prio{padding:10px 20px 28px}
+.prio-head{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 20px;justify-content:space-between;margin-bottom:12px}
+.tbl-wrap{overflow-x:auto}
+.prio table td .km{font-size:17px}
+.rank{font-family:var(--font-num);font-size:20px;font-weight:600;color:var(--ink-3)}
+.pill{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.pill .badge{width:34px;height:30px;font-size:17px;border-radius:7px}
+.chg-up{color:var(--h-A1);font-weight:700}
+.chg-new{color:var(--accent);font-weight:700}
+
+/* dialog */
+dialog{border:1px solid var(--line);border-radius:14px;padding:0;max-width:min(880px,94vw);width:100%;background:var(--surface);color:var(--ink)}
+dialog::backdrop{background:rgba(8,12,16,.5)}
+.dlg-head{padding:16px 20px 10px;border-bottom:1px solid var(--line)}
+.dlg-head h2{margin:0;font-size:17px}
+.dlg-head p{margin:2px 0 0;font-size:12.5px;color:var(--ink-3)}
+.dlg-body{padding:16px 20px;max-height:62vh;overflow:auto}
+.dlg-foot{padding:12px 20px 16px;border-top:1px solid var(--line);display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.form-tbl{border:1px solid var(--ink-3)}
+.form-tbl th,.form-tbl td{border:1px solid var(--line);padding:6px 10px}
+.form-tbl td:nth-child(5),.form-tbl td:first-child{white-space:nowrap}
+.form-tbl th{background:var(--surface-2);color:var(--ink-2);font-size:12.5px}
+.pending{margin:12px 0 0;font-size:13.5px;padding:10px 12px;border-radius:8px;background:var(--surface-2)}
+
+/* flight schedule */
+.sched{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,360px);gap:14px;padding:10px 20px 28px;align-items:start}
+.sched-main{grid-column:1;grid-row:1}
+.route-panel{grid-column:1;grid-row:2}
+.queue-panel{grid-column:2;grid-row:1 / span 2;overflow:hidden}
+.headrow{display:flex;flex-wrap:wrap;gap:10px 20px;align-items:flex-end;justify-content:space-between;margin-bottom:14px}
+.headrow h2{font-size:16px;margin:0 0 2px}
+.headrow p{margin:0;font-size:13px;color:var(--ink-3)}
+.btns{display:flex;gap:8px;flex-wrap:wrap}
+.cal-wrap{overflow-x:auto}
+.cal{display:grid;grid-template-columns:170px repeat(7,minmax(104px,1fr));gap:4px;min-width:920px}
+.cal-h{padding:8px 9px;border-radius:8px;background:var(--surface-2);font-size:12.5px;line-height:1.45;color:var(--ink-2)}
+.cal-h .dt{font-family:var(--font-num);font-size:20px;font-weight:600;color:var(--ink)}
+.cal-h .wk{margin-left:3px;font-size:13px}
+.st{display:inline-block;margin-top:4px;font-size:12px;padding:0 8px;border-radius:999px;border:1px solid var(--line)}
+.st-ok{color:var(--accent);border-color:var(--accent)}
+.st-warn{background:var(--h-A2);color:var(--h-A2-ink);border-color:var(--h-A2)}
+.st-ng{background:var(--surface-3);color:var(--ink-2)}
+.load{height:5px;border-radius:3px;background:var(--surface-3);margin-top:7px;overflow:hidden}
+.load i{display:block;height:100%;background:var(--accent)}
+.load-t{font-size:11.5px;color:var(--ink-3)}
+.cal-r{padding:8px 10px;font-size:13px;line-height:1.4;border-radius:8px;background:var(--surface-2)}
+.cal-r .km{font-size:15px;color:var(--ink-2)}
+.cell{min-height:92px;border:1px solid var(--line);border-radius:8px;padding:5px;display:flex;flex-direction:column;gap:4px;background:var(--surface);cursor:pointer}
+.cell.ng{background:repeating-linear-gradient(135deg,var(--surface-2) 0 6px,var(--surface) 6px 12px);cursor:not-allowed}
+.cell.target{border:2px dashed var(--accent);padding:4px}
+.fchip{display:block;width:100%;text-align:left;border:0;border-radius:6px;padding:3px 6px;font-size:12px;line-height:1.35;cursor:pointer}
+.fchip.is-sel{box-shadow:0 0 0 2px var(--signal)}
+.ft-video{background:var(--primary);color:var(--primary-ink)}
+.ft-still{background:var(--ink-2);color:var(--surface)}
+.ft-close{background:var(--teal);color:var(--teal-ink)}
+.ft-survey{background:var(--h-A2);color:var(--h-A2-ink)}
+.queue{list-style:none;margin:0;padding:6px}
+.queue .empty{padding:12px;color:var(--ink-3);font-size:13.5px}
+.qitem{display:flex;gap:10px;width:100%;text-align:left;background:transparent;border:0;border-radius:10px;padding:10px;cursor:pointer;align-items:flex-start}
+.qitem:hover{background:var(--surface-2)}
+.qitem.is-sel{background:var(--surface-2);box-shadow:inset 3px 0 0 var(--accent)}
+.qcode{flex:none;font-family:var(--font-num);font-size:18px;font-weight:600;width:44px;height:44px;border-radius:9px;display:flex;align-items:center;justify-content:center}
+.qname{display:block;font-weight:700;font-size:14px;line-height:1.45}
+.qmeta{display:block;font-size:12.5px;color:var(--ink-3)}
+.route svg{width:100%;height:auto;display:block;border-radius:8px}
+.route-facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px 16px;margin:12px 0 0;font-size:14px}
+.route-facts dt{font-size:12px;color:var(--ink-3)}
+.route-facts dd{margin:0}
+
+/* analysis */
+.anal{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,390px);gap:14px;padding:10px 20px 28px;align-items:start}
+.seg2{display:inline-flex;background:var(--surface-2);padding:3px;border-radius:9px;gap:2px;flex-wrap:wrap}
+.seg2 button{border:0;background:transparent;padding:6px 12px;border-radius:7px;font-size:13.5px;cursor:pointer;color:var(--ink-2)}
+.seg2 button[aria-pressed="true"]{background:var(--surface);color:var(--ink);font-weight:700;box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.ctrl-row{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center}
+.ctrl-row .lbl{font-size:12.5px;color:var(--ink-3)}
+.caution{margin:12px 0 4px;padding:10px 12px;border-radius:8px;border-left:4px solid var(--signal);background:var(--surface-2);font-size:13px;line-height:1.65}
+.chart-block{margin-top:16px}
+.chart-block h3{font-size:14px;margin:0 0 6px;display:flex;gap:6px 14px;flex-wrap:wrap;align-items:baseline}
+.chart-block h3 .lgd{font-weight:400;font-size:12px;color:var(--ink-2)}
+.lgd i{display:inline-block;width:18px;height:0;border-top:2.5px solid var(--accent);vertical-align:3px;margin-right:5px}
+.lgd i.dash{border-top:2px dashed var(--ink-3)}
+#heat{display:block;width:100%;height:200px;border-radius:8px;cursor:crosshair}
+.heat-legend{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-2);margin-top:6px;flex-wrap:wrap}
+.heat-bar{width:220px;height:10px;border-radius:3px;background:linear-gradient(90deg,var(--heat-neg2),var(--heat-neg1) 40%,var(--heat-0) 80%,var(--heat-pos))}
+.svgchart{display:block;width:100%;height:auto;overflow:visible}
+.anal-sum{padding:0 16px 10px;font-size:12.5px;color:var(--ink-3);margin:0}
+.finds{list-style:none;margin:0;padding:8px;display:grid;gap:8px}
+.find{border:1px solid var(--line);border-radius:10px;padding:12px;cursor:pointer;background:var(--surface)}
+.find:hover{background:var(--surface-2)}
+.find.is-sel{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+.find-top{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.kindtag{font-size:12px;padding:0 8px;border-radius:999px;background:var(--surface-2);color:var(--ink-2)}
+.find .km{font-size:17px}
+.find h3{font-size:14.5px;margin:4px 0 2px}
+.find p{margin:0;font-size:13px;color:var(--ink-2);line-height:1.6}
+.find .val{font-family:var(--font-num);font-size:18px;font-weight:600;color:var(--ink)}
+.find .actions{margin-top:8px;gap:6px}
+.find .btn{font-size:13px;padding:5px 10px}
+
+/* toast */
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translate(-50%,16px);opacity:0;transition:opacity .2s,transform .2s;background:var(--ink);color:var(--surface);padding:10px 16px;border-radius:10px;font-size:14px;z-index:60;pointer-events:none;max-width:calc(100vw - 32px)}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+@media (prefers-reduced-motion: reduce){.toast{transition:none}}
+
+@media (max-width:1020px){
+  .inspect{grid-template-columns:minmax(0,1fr)}
+  .side{grid-column:1;grid-row:auto;max-height:none}
+  .strip-panel{grid-row:auto}
+  .plan,.sched,.anal{grid-template-columns:minmax(0,1fr)}
+  .sched-main,.route-panel,.queue-panel{grid-column:1;grid-row:auto}
+  .queue-panel{order:2}
+  .route-panel{order:3}
+}
+@media (max-width:640px){
+  .appbar{gap:10px 16px;padding:10px 14px}
+  .tabs{margin-left:0;width:100%;overflow-x:auto}
+  .tab{flex:none;padding:7px 10px}
+  .inspect,.plan,.prio,.sched,.anal{padding-left:12px;padding-right:12px}
+  .demo-note{padding-left:14px;padding-right:14px}
+  .map{height:360px}
+  .map-legend,.map-hint{display:none}
+  .strip-panel{order:2}
+  .side{order:3}
+  .gantt{grid-template-columns:minmax(0,1fr)}
+  .g-label{padding-top:4px}
+}
+</style>
+</head>
+<body>
+<header class="appbar">
+  <div class="brand">
+    <svg width="30" height="30" viewBox="0 0 30 30" aria-hidden="true"><rect width="30" height="30" rx="7" fill="var(--primary)"/><path d="M10 5v20M20 5v20" stroke="var(--primary-ink)" stroke-width="2"/><path d="M6 9h18M6 15h18M6 21h18" stroke="var(--primary-ink)" stroke-width="2" opacity=".55"/></svg>
+    <span>軌道・構造物点検 確認アプリ</span><span class="tag">デモ</span>
+  </div>
+  <div class="context">
+    <span><b>〇〇線 上り</b>　<span class="km">12k400–15k600</span></span>
+    <span>2026年11月 定期点検（ドローン撮影）</span>
+  </div>
+  <nav class="tabs" role="tablist" aria-label="画面の切り替え">
+    <button class="tab" role="tab" aria-selected="false" data-view="sched">飛行スケジュール</button>
+    <button class="tab" role="tab" aria-selected="false" data-view="plan">撮影計画</button>
+    <button class="tab" role="tab" aria-selected="true" data-view="inspect">点検確認</button>
+    <button class="tab" role="tab" aria-selected="false" data-view="anal">変位解析</button>
+    <button class="tab" role="tab" aria-selected="false" data-view="prio">保守優先度</button>
+  </nav>
+</header>
+<p class="demo-note">表示している路線・構造物・変状・数値はすべて説明用の架空データです。</p>
+
+<main>
+<!-- 点検確認 -->
+<section class="view is-active" id="view-inspect" role="tabpanel">
+  <div class="inspect">
+    <div class="map" id="map">
+      <div class="map-legend" aria-hidden="true">
+        <span class="ttl">3D軌道マップ</span>
+        <span class="lg"><i class="sw sw-pts"></i>点群（ドローン撮影から作成）</span>
+        <span class="lg"><i class="sw sw-rail"></i>軌道（実測）</span>
+        <span class="lg"><i class="sw sw-interp"></i>軌道（補間・推定位置）</span>
+        <span class="lg"><i class="sw sw-dot"></i>変状候補</span>
+      </div>
+      <div class="map-tools">
+        <button class="btn" id="btn-overview">全景</button>
+        <button class="btn" id="btn-focus" disabled>選択箇所へ</button>
+      </div>
+      <div class="map-hint">ドラッグで回転、ホイールで拡大縮小、候補をクリックで選択</div>
+      <div class="map-fallback"><p>3Dビューを読み込めませんでした。下の縦断図と右の一覧から操作できます。</p></div>
+    </div>
+
+    <aside class="panel side" aria-label="変状候補">
+      <div class="side-head" id="side-head">
+        <h2>AIが抽出した変状候補</h2>
+        <p>判定は技術者が行います。AIの区分は参考値です。</p>
+        <div class="chips" id="chips"></div>
+      </div>
+      <div class="side-body" id="side-body"></div>
+    </aside>
+
+    <section class="panel strip-panel" aria-label="線路縦断">
+      <div class="strip-head">
+        <h2>線路縦断（キロ程）</h2>
+        <div class="strip-legend">
+          <span><i class="sw sw-meas"></i>実測データあり</span>
+          <span><i class="sw sw-int"></i>補間区間（データ空白を推定で補完）</span>
+        </div>
+      </div>
+      <div class="strip-grid">
+        <div class="strip-labels" aria-hidden="true">
+          <span style="top:13px">構造物</span>
+          <span style="top:45px">軌道3D</span>
+          <span style="top:77px">変状候補</span>
+          <span style="top:117px">キロ程</span>
+        </div>
+        <svg id="strip" role="group" aria-label="キロ程ごとの構造物、データ取得状況、変状候補"></svg>
+      </div>
+    </section>
+  </div>
+</section>
+
+<!-- 飛行スケジュール -->
+<section class="view" id="view-sched" role="tabpanel">
+  <div class="sched">
+    <section class="panel pad sched-main">
+      <div class="headrow">
+        <div>
+          <h2>週間の飛行スケジュール</h2>
+          <p>2026年11月30日〜12月6日（例）。線路閉鎖の有無と天候の予報から、飛行できる夜を判定します。</p>
+        </div>
+        <div class="btns"><button class="btn btn-primary" id="btn-auto">空いている日に自動で割り当て</button></div>
+      </div>
+      <div class="cal-wrap"><div class="cal" id="cal"></div></div>
+      <p class="mini">判定条件（例）：降雨時と風速7m/s以上は飛行しない。風速5m/s以上は注意。1晩の飛行は合計120分まで。条件は貴社の運用基準に合わせて設定します。</p>
+    </section>
+    <section class="panel pad route-panel route">
+      <div class="headrow">
+        <div><h2 id="route-title">飛行ルート</h2><p>ルートは模式図です。高度や離隔は運用基準と飛行許可の条件に合わせて設定します。</p></div>
+        <div class="btns" id="route-actions"></div>
+      </div>
+      <div id="route-svg"></div>
+      <dl class="route-facts" id="route-facts"></dl>
+    </section>
+    <aside class="panel queue-panel" aria-label="未割り当ての飛行">
+      <div class="side-head">
+        <h2>未割り当ての飛行 <span class="km" id="q-count"></span></h2>
+        <p>飛行を選んでから、カレンダーで同じ区間の日付をクリックしてください。再撮影の依頼もここに追加されます。</p>
+      </div>
+      <ul class="queue" id="queue"></ul>
+    </aside>
+  </div>
+</section>
+
+<!-- 撮影計画 -->
+<section class="view" id="view-plan" role="tabpanel">
+  <div class="plan">
+    <section class="panel pad">
+      <h2>線路閉鎖時間内の撮影計画</h2>
+      <p class="sub">B-14 橋梁と T-07 トンネル坑口の撮影。閉鎖時間は例として 01:10–03:50 で表示しています。</p>
+      <div class="gantt" id="gantt"></div>
+      <div class="g-legend">
+        <span><i style="background:var(--primary)"></i>全景動画</span>
+        <span><i style="background:var(--ink-2)"></i>部材単位の静止画</span>
+        <span><i style="background:var(--teal)"></i>近接静止画</span>
+        <span><i style="background:var(--surface-3)"></i>準備・撤収</span>
+      </div>
+      <div class="warn" id="plan-warn">再撮影を含めると閉鎖時間内に収まりません。別の閉鎖日に分けて計画してください。</div>
+    </section>
+    <div style="display:grid;gap:14px">
+      <section class="panel pad">
+        <h2>撮り分けの考え方</h2>
+        <p class="sub">目的によって適した素材が異なります。</p>
+        <table>
+          <thead><tr><th>目的</th><th>素材</th><th>主な使い道</th></tr></thead>
+          <tbody>
+            <tr><td>全景</td><td>動画</td><td>3D軌道マップの作成、位置合わせ</td></tr>
+            <tr><td>部材単位</td><td>静止画</td><td>変状候補の抽出、前回との比較</td></tr>
+            <tr><td>近接</td><td>高解像度の静止画</td><td>ひび割れ幅・範囲の推定</td></tr>
+          </tbody>
+        </table>
+      </section>
+      <section class="panel pad">
+        <h2>現場条件の確認事項（例）</h2>
+        <ul class="check">
+          <li>架線・電気設備との離隔</li>
+          <li>夜間撮影の照明と露出</li>
+          <li>列車見張・退避の手順</li>
+          <li>飛行に必要な許可・承認</li>
+        </ul>
+        <p class="mini">実際の条件は貴社の運用ルールに合わせて設定します。</p>
+      </section>
+    </div>
+  </div>
+</section>
+
+<!-- 変位解析 -->
+<section class="view" id="view-anal" role="tabpanel">
+  <div class="anal">
+    <section class="panel pad anal-main">
+      <div class="headrow">
+        <div>
+          <h2>変位解析（ドローン写真測量の時系列比較）</h2>
+          <p>過去の点群と今回の点群を重ね合わせ、路盤・地盤の沈下と軌道の変形の兆候を推定します。</p>
+        </div>
+      </div>
+      <div class="ctrl-row">
+        <div class="seg2" id="anal-view" role="group" aria-label="解析の種類">
+          <button data-v="settle">路盤・地盤の沈下</button>
+          <button data-v="track">軌道の変形（高低・通り）</button>
+        </div>
+        <span class="lbl">比較する時期</span>
+        <div class="seg2" id="anal-epoch" role="group" aria-label="比較する時期">
+          <button data-e="2025">2025年11月 → 2026年11月</button>
+          <button data-e="2024">2024年11月 → 2026年11月</button>
+        </div>
+      </div>
+      <p class="caution">数値は点群の比較による推定値です。写真測量の高さの精度は撮影条件や標定点（GCP）の配置で変わり、センチメートル単位の誤差を含みます。mm単位の軌道狂いの判定には使わず、検測車データや現地測量で確認すべき箇所を絞り込むために使います。</p>
+      <div id="anal-body"></div>
+    </section>
+    <aside class="panel side2" aria-label="検出された変位">
+      <div class="side-head">
+        <h2>検出された変位</h2>
+        <p>クリックすると図の該当範囲を表示します。</p>
+      </div>
+      <p class="anal-sum" id="anal-sum"></p>
+      <ul class="finds" id="finds"></ul>
+    </aside>
+  </div>
+</section>
+
+<!-- 保守優先度 -->
+<section class="view" id="view-prio" role="tabpanel">
+  <div class="prio">
+    <div class="panel pad">
+      <div class="prio-head">
+        <div>
+          <h2>保守優先度（AIの提案）</h2>
+          <p class="sub" style="margin:0;font-size:13px;color:var(--ink-3)">判定区分と前回からの変化をもとに並べています。最終判断は技術者が行います。</p>
+        </div>
+        <button class="btn btn-primary" id="btn-draft">調書の下書きを作成</button>
+      </div>
+      <div class="tbl-wrap"><table id="prio-table"></table></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<dialog id="draft" aria-labelledby="draft-title">
+  <div class="dlg-head">
+    <h2 id="draft-title">点検調書（下書き）</h2>
+    <p>技術者が確定した判定のみを反映しています。内容を確認・修正してから確定してください。</p>
+  </div>
+  <div class="dlg-body" id="draft-body"></div>
+  <div class="dlg-foot">
+    <button class="btn" id="btn-draft-close">閉じる</button>
+    <button class="btn btn-primary" id="btn-draft-export">調書として出力</button>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(() => {
+'use strict';
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------- demo data (fictional) ---------- */
+const SEC = { from: 12400, to: 15600 };
+const fmtKm = s => `${Math.floor(s / 1000)}k${String(Math.round(s) % 1000).padStart(3, '0')}`;
+
+const STRUCTURES = [
+  { id: 'E1', type: 'earth', name: '盛土', from: 12400, to: 13150 },
+  { id: 'B-14', type: 'bridge', name: 'B-14 橋梁', from: 13150, to: 13520 },
+  { id: 'E2', type: 'earth', name: '切土', from: 13520, to: 14200 },
+  { id: 'T-07', type: 'tunnel', name: 'T-07 トンネル', from: 14200, to: 14980 },
+  { id: 'E3', type: 'earth', name: '盛土', from: 14980, to: 15600 },
+];
+const COVERAGE = [
+  { from: 12400, to: 13260, kind: 'measured' },
+  { from: 13260, to: 13410, kind: 'interp', reason: '橋梁上の点群欠測' },
+  { from: 13410, to: 14230, kind: 'measured' },
+  { from: 14230, to: 14950, kind: 'interp', reason: 'トンネル内（ドローン撮影・GNSSの範囲外）' },
+  { from: 14950, to: 15600, kind: 'measured' },
+];
+const PIERS = [13200, 13230, 13262, 13330, 13400, 13460];
+const inBridge = s => s >= 13150 && s <= 13520;
+const inTunnel = s => s >= 14200 && s <= 14980;
+const isInterp = s => COVERAGE.some(c => c.kind === 'interp' && s >= c.from && s <= c.to);
+
+const RANKS = ['AA', 'A1', 'A2', 'B', 'C', 'S'];
+const RANK_TIP = { AA: '緊急に措置が必要', A1: '早急に措置が必要', A2: '必要な時期に措置', B: '進行を監視', C: '軽微', S: '健全' };
+
+const C = [
+  { id: 'c1', km: 13262, struct: 'B-14 橋梁', part: 'P3 橋脚', defect: 'ひび割れ', ai: 'A2', conf: '高', status: 'open', media: '近接静止画', change: '拡大', kind: 'crack',
+    note: '前回点検時と比べて、ひび割れの延長が伸びている可能性があります。幅の推定値（約0.3mm）は画像からの参考値です。',
+    history: [{ y: '2022', v: 0.1 }, { y: '2024', v: 0.2 }, { y: '2026', v: 0.3 }], pos: 'pier' },
+  { id: 'c2', km: 13330, struct: 'B-14 橋梁', part: 'P4 橋脚', defect: 'ひび割れ', ai: 'B', conf: '中', status: 'open', media: '部材単位の静止画', change: '新規', kind: 'crack-new',
+    note: '前回の記録に該当する変状が見当たらず、新たに発生した可能性があります。幅の推定には近接静止画が必要です。', pos: 'pier' },
+  { id: 'c3', km: 13405, struct: 'B-14 橋梁', part: 'G5 主桁', defect: '腐食', ai: 'B', conf: '中', status: 'open', media: '部材単位の静止画', change: '変化なし', kind: 'rust',
+    note: '塗装の劣化と腐食の範囲は前回と同程度です。', pos: 'girder' },
+  { id: 'c4', km: 13168, struct: 'B-14 橋梁', part: 'A1 橋台', defect: '漏水・遊離石灰', ai: 'C', conf: '中', status: 'confirmed', judged: 'C', media: '部材単位の静止画', change: '変化なし', kind: 'leak',
+    note: '漏水の跡と遊離石灰が見られます。範囲は前回と同程度です。', pos: 'abut' },
+  { id: 'c5', km: 14205, struct: 'T-07 トンネル', part: '起点方坑口 覆工', defect: 'うき・はく離の疑い', ai: 'A1', conf: '低', status: 'reshoot', media: '動画フレーム', change: '—', kind: 'lining',
+    note: '動画から切り出したフレームのみで、解像度が不足しています。近接静止画での再撮影を推奨します。', pos: 'portal' },
+  { id: 'c6', km: 12880, struct: '盛土区間', part: 'のり面', defect: 'のり面の小崩れ', ai: 'B', conf: '中', status: 'open', media: '全景動画', change: '新規', kind: 'slope',
+    note: '前回の全景映像には見られない崩れがあります。範囲は小さいものの、降雨後の確認を推奨します。', pos: 'slope' },
+  { id: 'c7', km: 15120, struct: '盛土区間', part: '側溝', defect: '排水不良（滞水）', ai: 'C', conf: '高', status: 'confirmed', judged: 'C', media: '全景動画', change: '変化なし', kind: 'drain',
+    note: '側溝内に滞水が見られます。前回も同様の記録があります。', pos: 'drain' },
+];
+const eff = c => c.judged || c.ai;
+const STATUS = { open: '未確認', confirmed: '判定確定', reshoot: '再撮影を依頼中' };
+
+const state = { sel: null, filter: 'all' };
+
+/* ---------- toast ---------- */
+let toastTimer;
+function toast(msg) {
+  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+/* ---------- tabs ---------- */
+$$('.tab').forEach(b => b.addEventListener('click', () => showView(b.dataset.view)));
+function showView(v) {
+  $$('.tab').forEach(b => b.setAttribute('aria-selected', String(b.dataset.view === v)));
+  $$('.view').forEach(s => s.classList.toggle('is-active', s.id === 'view-' + v));
+  if (v === 'inspect') { renderStrip(); three.resize && three.resize(); }
+  if (v === 'plan') renderPlan();
+  if (v === 'prio') renderPrio();
+  if (v === 'sched') renderSched();
+  if (v === 'anal') renderAnal();
+}
+
+/* ---------- badges ---------- */
+function badge(c, small) {
+  const r = eff(c), fixed = !!c.judged;
+  return `<span class="badge ${fixed ? 'is-fixed' : 'is-ai'}" style="--hc:var(--h-${r});--hci:var(--h-${r}-ink)" title="${RANK_TIP[r]}">${r}${small === false ? '' : `<small>${fixed ? '確定' : 'AI提案'}</small>`}</span>`;
+}
+
+/* ---------- side panel: list ---------- */
+function renderChips() {
+  const n = k => k === 'all' ? C.length : C.filter(c => c.status === k).length;
+  const defs = [['all', 'すべて'], ['open', '未確認'], ['confirmed', '判定確定'], ['reshoot', '再撮影']];
+  $('#chips').innerHTML = defs.map(([k, l]) => `<button class="chip" data-f="${k}" aria-pressed="${state.filter === k}">${l}<span class="n">${n(k)}</span></button>`).join('');
+  $$('#chips .chip').forEach(b => b.addEventListener('click', () => { state.filter = b.dataset.f; state.sel = null; renderSide(); renderStrip(); three.refresh && three.refresh(); }));
+}
+function renderList() {
+  const items = C.filter(c => state.filter === 'all' || c.status === state.filter).sort((a, b) => a.km - b.km);
+  $('#side-body').innerHTML = items.length ? `<ul class="cands">${items.map(c => `
+    <li><button class="cand ${c.id === state.sel ? 'is-sel' : ''}" data-id="${c.id}">
+      ${badge(c)}
+      <span class="cand-main">
+        <span class="km">${fmtKm(c.km)}</span>
+        <span class="cand-title">${esc(c.struct)}　${esc(c.part)}　${esc(c.defect)}</span>
+        <span class="cand-meta">${STATUS[c.status]}　素材：${esc(c.media)}　信頼度：${c.conf}</span>
+      </span>
+    </button></li>`).join('')}</ul>`
+    : `<p style="padding:16px;color:var(--ink-3)">該当する候補はありません。</p>`;
+  $$('#side-body .cand').forEach(b => b.addEventListener('click', () => select(b.dataset.id, true)));
+}
+function renderSide() {
+  renderChips();
+  $('#side-head').hidden = false;
+  if (state.sel) renderDetail(C.find(c => c.id === state.sel)); else renderList();
+}
+
+/* ---------- detail ---------- */
+function renderDetail(c) {
+  $('#side-head').hidden = true;
+  const pick = c.judged || c.ai;
+  const prevLabel = c.kind === 'lining' ? '前回の記録' : '前回（2024年11月）';
+  const prevVariant = c.kind === 'lining' ? 'none' : (c.change === '新規' ? 'clean' : 'prev');
+  $('#side-body').innerHTML = `
+  <div class="detail">
+    <button class="linkbtn" id="back">一覧に戻る</button>
+    <div class="d-head">
+      <span class="km">${fmtKm(c.km)}</span>
+      <div><h2>${esc(c.struct)}　${esc(c.part)}</h2><p>${esc(c.defect)}　前回から：${esc(c.change)}</p></div>
+    </div>
+    <div class="compare">
+      <figure><figcaption>${prevLabel}</figcaption>${surfaceSVG(c, prevVariant)}</figure>
+      <figure><figcaption>今回（2026年11月）</figcaption>${surfaceSVG(c, 'now')}</figure>
+    </div>
+    <p class="imgnote">画像はデモ用のイメージです。</p>
+    <div class="box">
+      <h3>AIの所見</h3>
+      <p>${esc(c.note)}</p>
+      <dl class="facts">
+        <dt>AIの区分</dt><dd>${c.ai}（参考）</dd>
+        <dt>信頼度</dt><dd>${c.conf}</dd>
+        <dt>素材</dt><dd>${esc(c.media)}</dd>
+        <dt>状態</dt><dd>${STATUS[c.status]}${c.judged ? `（${c.judged}）` : ''}</dd>
+      </dl>
+    </div>
+    <div class="judge">
+      <h3>技術者の判定</h3>
+      <div class="seg" role="group" aria-label="判定区分">
+        ${RANKS.map(r => `<button data-r="${r}" aria-pressed="${r === pick}" title="${RANK_TIP[r]}" style="--hc:var(--h-${r});--hci:var(--h-${r}-ink)">${r}<small>${r === c.ai ? 'AI提案' : ''}</small></button>`).join('')}
+      </div>
+      <p class="hint">区分は貴社の判定基準に合わせて設定します（ここでは例として健全度の区分を表示）。</p>
+      <label>コメント<textarea id="comment" placeholder="現地確認の要否、補足など">${esc(c.comment || '')}</textarea></label>
+      <div class="actions">
+        <button class="btn btn-primary" id="btn-confirm">判定を確定</button>
+        <button class="btn" id="btn-reshoot" ${c.status === 'reshoot' ? 'disabled' : ''}>再撮影を依頼</button>
+      </div>
+    </div>
+    ${c.history ? `<div class="box trend"><h3>ひび割れ幅の推移（推定）</h3>${trendSVG(c.history)}</div>` : ''}
+  </div>`;
+  let chosen = pick;
+  $('#back').addEventListener('click', () => { state.sel = null; renderSide(); renderStrip(); three.refresh && three.refresh(); });
+  $$('.seg button').forEach(b => b.addEventListener('click', () => {
+    chosen = b.dataset.r; $$('.seg button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+  }));
+  $('#btn-confirm').addEventListener('click', () => {
+    c.judged = chosen; c.status = 'confirmed'; c.comment = $('#comment').value;
+    toast(`${c.part}の判定を確定しました（${chosen}）`);
+    renderSide(); renderStrip(); three.refresh && three.refresh();
+  });
+  $('#btn-reshoot').addEventListener('click', () => {
+    c.status = 'reshoot'; c.comment = $('#comment').value;
+    toast(`${c.part}の再撮影を撮影計画に追加しました`);
+    renderSide(); renderStrip(); three.refresh && three.refresh();
+  });
+}
+
+/* ---------- seeded random ---------- */
+function rng(seed) { let a = seed >>> 0; return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+/* ---------- illustrative surface images (SVG) ---------- */
+let svgN = 0;
+function surfaceSVG(c, variant) {
+  const id = 'sv' + (++svgN);
+  const W = 240, H = 160;
+  if (variant === 'none') {
+    return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="前回の記録なし"><rect width="${W}" height="${H}" fill="#8F948D"/><rect x="1" y="1" width="${W - 2}" height="${H - 2}" fill="none" stroke="#C6CAC2" stroke-dasharray="5 4"/><text x="${W / 2}" y="${H / 2 + 5}" text-anchor="middle" font-size="13" fill="#F3F4F0" font-family="BIZ UDPGothic, sans-serif">該当する記録なし</text></svg>`;
+  }
+  const tex = (base, freq, alpha) => `
+    <filter id="${id}t" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="${freq}" numOctaves="3" seed="7"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="table" tableValues="0 ${alpha}"/></feComponentTransfer></filter>
+    <rect width="${W}" height="${H}" fill="${base}"/><rect width="${W}" height="${H}" filter="url(#${id}t)"/>`;
+  const box = (x, y, w, h, label) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="none" stroke="#F2C200" stroke-width="2" stroke-dasharray="6 3"/><rect x="${x}" y="${y - 15}" width="${label.length * 11 + 10}" height="15" fill="#F2C200"/><text x="${x + 5}" y="${y - 4}" font-size="10.5" fill="#241E00" font-family="BIZ UDPGothic, sans-serif">${label}</text>`;
+  let body = '', defs = '', filt = '';
+  const k = c.kind;
+  if (k === 'crack' || k === 'crack-new') {
+    defs = tex('#A6A9A2', 0.85, 0.42);
+    if (variant !== 'clean') {
+      const r = rng(k === 'crack' ? 11 : 23);
+      const steps = k === 'crack' ? (variant === 'prev' ? 9 : 15) : 10;
+      let x = k === 'crack' ? 70 : 140, y = 22; const pts = [[x, y]];
+      for (let i = 0; i < steps; i++) { x += (r() - 0.45) * 16; y += 7 + r() * 3; pts.push([x, y]); }
+      const d = pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+      const w = k === 'crack' ? (variant === 'prev' ? 1.1 : 1.7) : 1.1;
+      body += `<path d="${d}" fill="none" stroke="#3A3A37" stroke-width="${w + 1.2}" opacity=".35" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="#1E1E1C" stroke-width="${w}" stroke-linejoin="round"/>`;
+      if (variant === 'now' && k === 'crack') { const b = pts[6]; body += `<path d="M${b[0]} ${b[1]} l18 9 l7 12" fill="none" stroke="#1E1E1C" stroke-width=".8"/>`; }
+      const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+      if (variant === 'now') { const bw = Math.max(64, Math.max(...xs) - Math.min(...xs) + 34), cx = (Math.max(...xs) + Math.min(...xs)) / 2; body += box(cx - bw / 2, Math.min(...ys) - 2, bw, Math.max(...ys) - Math.min(...ys) + 12, 'AI検出'); }
+    }
+  } else if (k === 'rust') {
+    defs = tex('#6F7A84', 0.7, 0.35);
+    filt = `<filter id="${id}d"><feTurbulence type="turbulence" baseFrequency="0.06" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="18"/></filter>`;
+    const s = variant === 'prev' ? 0.95 : 1;
+    body += `<rect x="0" y="96" width="${W}" height="10" fill="#5A646D"/><g filter="url(#${id}d)" fill="#8B4A1C" opacity=".9"><ellipse cx="80" cy="102" rx="${30 * s}" ry="${12 * s}"/><ellipse cx="150" cy="98" rx="${18 * s}" ry="${9 * s}"/><ellipse cx="185" cy="108" rx="${10 * s}" ry="${6 * s}"/></g>`;
+    if (variant === 'now') body += box(42, 82, 162, 40, 'AI検出');
+  } else if (k === 'leak') {
+    defs = tex('#A3A69F', 0.8, 0.4);
+    body += `<rect x="0" y="34" width="${W}" height="4" fill="#6E716B"/>`;
+    const r = rng(5);
+    for (let i = 0; i < 7; i++) { const x = 60 + i * 18 + r() * 8; const len = 40 + r() * 60; body += `<path d="M${x} 38 q ${r() * 6 - 3} ${len / 2} ${r() * 4 - 2} ${len}" stroke="#F0EFE8" stroke-width="${2 + r() * 3}" fill="none" opacity=".85" stroke-linecap="round"/>`; }
+    if (variant === 'now') body += box(50, 40, 150, 100, 'AI検出');
+  } else if (k === 'lining') {
+    filt = `<filter id="${id}b"><feGaussianBlur stdDeviation="1.8"/></filter>`;
+    defs = tex('#5F625C', 0.9, 0.3);
+    body += `<g filter="url(#${id}b)"><path d="M0 160 L0 70 Q120 -10 240 70 L240 160 Z" fill="#707369" opacity=".7"/><ellipse cx="120" cy="66" rx="34" ry="20" fill="#4C4F49" opacity=".9"/><ellipse cx="124" cy="62" rx="20" ry="10" fill="#8A8D84" opacity=".6"/></g><rect x="6" y="140" width="128" height="15" fill="rgba(0,0,0,.55)"/><text x="11" y="151" font-size="10" fill="#EEE" font-family="BIZ UDPGothic, sans-serif">動画フレームから切り出し</text>`;
+    body += box(80, 42, 88, 46, '要再撮影');
+  } else if (k === 'slope') {
+    defs = tex('#7D8B5B', 0.5, 0.45);
+    if (variant === 'now') {
+      body += `<path d="M96 40 Q120 30 140 46 Q150 80 132 110 Q112 122 98 104 Q86 70 96 40 Z" fill="#8C6A43"/><path d="M100 50 Q118 44 132 56" stroke="#6A4E30" stroke-width="2" fill="none"/>`;
+      body += box(80, 30, 76, 96, 'AI検出');
+    }
+  } else if (k === 'settle' || k === 'track') {
+    defs = `<rect width="${W}" height="${H}" fill="#E7E9E3"/>`;
+    for (let i = 1; i < 6; i++) body += `<path d="M0 ${i * 27} Q120 ${i * 27 + (i % 2 ? 8 : -8)} 240 ${i * 27}" fill="none" stroke="#C9CDC4" stroke-width="1"/>`;
+    if (variant === 'now') body += `<radialGradient id="${id}g"><stop offset="0" stop-color="#8A2E0E"/><stop offset=".5" stop-color="#EFA24A"/><stop offset="1" stop-color="#EFA24A" stop-opacity="0"/></radialGradient><ellipse cx="${k === 'settle' ? 110 : 120}" cy="${k === 'settle' ? 70 : 80}" rx="78" ry="40" fill="url(#${id}g)"/>`;
+    body += `<line x1="0" x2="${W}" y1="80" y2="80" stroke="#1D2328" stroke-width="2"/><rect x="6" y="140" width="128" height="15" fill="rgba(0,0,0,.55)"/><text x="11" y="151" font-size="10" fill="#EEE" font-family="BIZ UDPGothic, sans-serif">点群の標高差（推定）</text>`;
+    if (variant === 'now') body += box(36, 36, 160, 76, 'AI検出');
+  } else if (k === 'drain') {
+    defs = tex('#9A9D96', 0.8, 0.35);
+    body += `<rect x="0" y="62" width="${W}" height="44" fill="#7E817A"/><rect x="0" y="70" width="${W}" height="28" fill="#5E625C"/><path d="M30 76 H210 V94 H30 Z" fill="#2F4A57" opacity=".85"/>`;
+    if (variant === 'now') body += box(24, 66, 192, 36, 'AI検出');
+  }
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(c.part)}の画像イメージ"><defs>${filt}</defs>${defs}${body}</svg>`;
+}
+
+function trendSVG(h) {
+  const W = 300, H = 122, L = 34, R = 14, T = 22, B = 26, max = 0.4;
+  const X = i => L + i * (W - L - R) / (h.length - 1), Y = v => T + (1 - v / max) * (H - T - B);
+  const grid = [0, 0.1, 0.2, 0.3, 0.4].map(v => `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${L - 6}" y="${Y(v) + 4}" text-anchor="end" font-size="11" fill="var(--ink-3)" font-family="Barlow Condensed, sans-serif">${v.toFixed(1)}</text>`).join('');
+  const line = h.map((p, i) => `${i ? 'L' : 'M'}${X(i)} ${Y(p.v)}`).join(' ');
+  const pts = h.map((p, i) => `<circle cx="${X(i)}" cy="${Y(p.v)}" r="4" fill="var(--h-A2)" stroke="var(--surface-2)" stroke-width="2"/><text x="${X(i)}" y="${H - 8}" text-anchor="middle" font-size="12" fill="var(--ink-2)" font-family="Barlow Condensed, sans-serif">${p.y}</text>`).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="ひび割れ幅の推移（mm、推定）">${grid}<text x="${L - 6}" y="10" text-anchor="end" font-size="11" fill="var(--ink-3)">mm</text><path d="${line}" fill="none" stroke="var(--h-A2)" stroke-width="2.5"/>${pts}</svg>`;
+}
+
+/* ---------- strip (linear chart) ---------- */
+function renderStrip() {
+  const svg = $('#strip'); if (!svg || !svg.isConnected) return;
+  const W = Math.max(280, svg.clientWidth || svg.parentNode.clientWidth || 600), H = 132, pad = 12;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  const X = s => pad + (s - SEC.from) / (SEC.to - SEC.from) * (W - 2 * pad);
+  let out = `<defs><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" style="fill:var(--interp-bg)"/><rect width="2.2" height="6" style="fill:var(--signal)"/></pattern></defs>`;
+  // structures
+  STRUCTURES.forEach(st => {
+    const x = X(st.from), w = X(st.to) - x;
+    const fill = st.type === 'bridge' ? 'var(--primary)' : st.type === 'tunnel' ? 'var(--tunnel)' : 'var(--surface-3)';
+    const ink = st.type === 'bridge' ? 'var(--primary-ink)' : st.type === 'tunnel' ? 'var(--tunnel-ink)' : 'var(--ink-2)';
+    out += `<rect x="${x}" y="6" width="${w}" height="28" style="fill:${fill}" stroke="var(--surface)" stroke-width="1"><title>${st.name}（${fmtKm(st.from)}–${fmtKm(st.to)}）</title></rect>`;
+    if (w > st.name.length * 12 + 10) out += `<text x="${x + w / 2}" y="25" text-anchor="middle" font-size="12" style="fill:${ink}">${st.name}</text>`;
+    if (st.type === 'bridge') PIERS.forEach(p => { out += `<line x1="${X(p)}" x2="${X(p)}" y1="30" y2="34" style="stroke:${ink}" stroke-width="1.5"/>`; });
+  });
+  // coverage
+  COVERAGE.forEach(cv => {
+    const x = X(cv.from), w = X(cv.to) - x;
+    out += cv.kind === 'measured'
+      ? `<rect x="${x}" y="42" width="${w}" height="14" rx="2" style="fill:var(--ink-2)" opacity=".55"><title>実測データあり</title></rect>`
+      : `<rect x="${x}" y="42" width="${w}" height="14" rx="2" fill="url(#hatch)" style="stroke:var(--pc-interp)" stroke-width="1"><title>補間区間：${cv.reason}</title></rect>`;
+  });
+  // candidates
+  const vis = C.filter(c => state.filter === 'all' || c.status === state.filter).sort((a, b) => a.km - b.km);
+  let lastX = -99, lane = 0;
+  const sel = C.find(c => c.id === state.sel);
+  if (sel) out += `<line x1="${X(sel.km)}" x2="${X(sel.km)}" y1="2" y2="${H - 22}" style="stroke:var(--accent)" stroke-width="2.5"/>`;
+  vis.forEach(c => {
+    const x = X(c.km); lane = (x - lastX < 24) ? 1 - lane : 0; lastX = x;
+    const y = lane ? 92 : 76, r = eff(c), isSel = c.id === state.sel;
+    out += `<g class="sm" data-id="${c.id}" tabindex="0" role="button" aria-label="${fmtKm(c.km)} ${c.part} ${c.defect}">
+      <circle class="ring" cx="${x}" cy="${y}" r="${isSel ? 13 : 11}" style="fill:${c.judged ? `var(--h-${r})` : 'var(--surface)'};stroke:${isSel ? 'var(--accent)' : `var(--h-${r})`}" stroke-width="${isSel ? 3 : 2}" ${c.judged ? '' : 'stroke-dasharray="3 2"'}/>
+      <text x="${x}" y="${y + 4.5}" text-anchor="middle" font-size="13" font-weight="700" style="fill:${c.judged ? `var(--h-${r}-ink)` : 'var(--ink)'};font-family:var(--font-num)">${r}</text></g>`;
+  });
+  // axis
+  out += `<line x1="${pad}" x2="${W - pad}" y1="110" y2="110" style="stroke:var(--ink-3)"/>`;
+  const pxPerM = (W - 2 * pad) / (SEC.to - SEC.from);
+  const labelStep = pxPerM * 500 > 64 ? 500 : 1000, gapM = 56 / pxPerM;
+  for (let s = Math.ceil(SEC.from / 100) * 100; s <= SEC.to; s += 100) {
+    const major = s % labelStep === 0;
+    out += `<line x1="${X(s)}" x2="${X(s)}" y1="110" y2="${major ? 117 : 114}" style="stroke:var(--ink-3)"/>`;
+  }
+  const marks = [SEC.from];
+  for (let s = Math.ceil(SEC.from / labelStep) * labelStep; s < SEC.to; s += labelStep) if (s - SEC.from > gapM && SEC.to - s > gapM) marks.push(s);
+  marks.push(SEC.to);
+  marks.forEach((s, i) => {
+    const anchor = i === 0 ? 'start' : i === marks.length - 1 ? 'end' : 'middle';
+    out += `<text x="${X(s)}" y="130" text-anchor="${anchor}" font-size="14" style="fill:var(--ink-2);font-family:var(--font-num)">${fmtKm(s)}</text>`;
+  });
+  svg.innerHTML = out;
+  $$('#strip .sm').forEach(g => {
+    g.addEventListener('click', () => select(g.dataset.id, true));
+    g.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(g.dataset.id, true); } });
+  });
+}
+
+function select(id, focus3d) {
+  state.sel = id;
+  renderSide(); renderStrip();
+  if (three.refresh) three.refresh();
+  if (focus3d && three.focus) three.focus(id);
+  $('#btn-focus').disabled = !id;
+}
+
+/* ---------- plan ---------- */
+function renderPlan() {
+  const T0 = 60, T1 = 240, WIN = [70, 230];
+  const P = t => ((t - T0) / (T1 - T0) * 100).toFixed(2) + '%';
+  const hm = t => `${String(Math.floor(t / 60)).padStart(2, '0')}:${String(t % 60).padStart(2, '0')}`;
+  const rows = [
+    { l: '準備・機材点検', a: 70, b: 85, k: 'prep' },
+    { l: 'F1　B-14 全景動画（3D化・位置合わせ用）', a: 85, b: 110, k: 'video' },
+    { l: 'F2　B-14 橋脚P1〜P6 部材単位の静止画', a: 115, b: 155, k: 'still' },
+    { l: 'F3　P3・P4 近接静止画（ひび割れ幅の推定用）', a: 160, b: 185, k: 'close' },
+  ];
+  let t = 190, n = 4;
+  C.filter(c => c.status === 'reshoot').sort((a, b) => a.km - b.km).forEach(c => { rows.push({ l: `F${n++}　${c.struct} ${c.part} 近接静止画（再撮影）`, a: t, b: t + 20, k: 'close' }); t += 20; });
+  rows.push({ l: '撤収・線路閉鎖の解除', a: t, b: t + 20, k: 'prep' });
+  const over = t + 20 > WIN[1];
+  let html = '';
+  rows.forEach(r => {
+    html += `<div class="g-label">${esc(r.l)}</div><div class="g-track"><div class="g-window" style="left:${P(WIN[0])};width:calc(${P(WIN[1])} - ${P(WIN[0])})"></div><div class="g-bar g-${r.k} ${over && r.b > WIN[1] ? 'g-over' : ''}" style="left:${P(r.a)};width:calc(${P(Math.min(r.b, T1))} - ${P(r.a)})" title="${hm(r.a)}–${hm(r.b)}">${hm(r.a)}</div></div>`;
+  });
+  html += `<div></div><div class="g-axis">${[60, 90, 120, 150, 180, 210, 240].map(m => `<span style="left:${P(m)}">${hm(m)}</span>`).join('')}</div>`;
+  $('#gantt').innerHTML = html;
+  $('#plan-warn').classList.toggle('show', over);
+}
+
+/* ---------- priority ---------- */
+const ACTION = { AA: '緊急の措置を検討', A1: '早期に詳細調査', A2: '計画的な補修を検討', B: '次回点検で重点確認', C: '記録・経過観察', S: '—' };
+function renderPrio() {
+  const chgW = { '拡大': 0, '新規': 1, '変化なし': 2, '—': 3 };
+  const rows = C.slice().sort((a, b) => RANKS.indexOf(eff(a)) - RANKS.indexOf(eff(b)) || chgW[a.change] - chgW[b.change] || a.km - b.km);
+  $('#prio-table').innerHTML = `<thead><tr><th>順位</th><th>キロ程</th><th>箇所</th><th>変状</th><th>区分</th><th>前回から</th><th>対応案（AI提案）</th></tr></thead><tbody>${rows.map((c, i) => `
+    <tr><td class="rank">${i + 1}</td><td><span class="km">${fmtKm(c.km)}</span></td><td>${esc(c.struct)}<br>${esc(c.part)}</td><td>${esc(c.defect)}</td>
+    <td><span class="pill">${badge(c, false)}<span style="font-size:12.5px;color:var(--ink-3)">${c.judged ? '確定' : 'AI提案'}</span></span></td>
+    <td class="${c.change === '拡大' ? 'chg-up' : c.change === '新規' ? 'chg-new' : ''}">${esc(c.change)}</td>
+    <td>${c.status === 'reshoot' ? '近接静止画で再撮影' : ACTION[eff(c)]}</td></tr>`).join('')}</tbody>`;
+}
+
+/* ---------- draft dialog ---------- */
+const dlg = $('#draft');
+$('#btn-draft').addEventListener('click', () => {
+  const done = C.filter(c => c.judged).sort((a, b) => a.km - b.km);
+  const pending = C.filter(c => !c.judged).length;
+  $('#draft-body').innerHTML = `
+    <table class="form-tbl" style="margin-bottom:14px"><tbody>
+      <tr><th>線名</th><td>〇〇線 上り</td><th>区間</th><td><span class="km">12k400–15k600</span></td></tr>
+      <tr><th>点検日</th><td>2026年11月（夜間・線路閉鎖）</td><th>点検者</th><td>[氏名]</td></tr>
+      <tr><th>点検方法</th><td colspan="3">ドローン撮影（全景動画・部材単位の静止画・近接静止画）とAIによる候補抽出、技術者による確認</td></tr>
+    </tbody></table>
+    <table class="form-tbl"><thead><tr><th>キロ程</th><th>構造物・部材</th><th>変状</th><th>判定</th><th>前回から</th><th>所見</th></tr></thead><tbody>
+      ${done.length ? done.map(c => `<tr><td><span class="km">${fmtKm(c.km)}</span></td><td>${esc(c.struct)} ${esc(c.part)}</td><td>${esc(c.defect)}</td><td><b>${c.judged}</b></td><td>${esc(c.change)}</td><td>${esc(c.comment || c.note)}</td></tr>`).join('') : `<tr><td colspan="6">確定した判定はまだありません。</td></tr>`}
+    </tbody></table>
+    ${pending ? `<p class="pending">未確定の候補が${pending}件あります。判定を確定すると、この下書きに反映されます。</p>` : ''}`;
+  if (typeof dlg.showModal === 'function') dlg.showModal(); else dlg.setAttribute('open', '');
+});
+$('#btn-draft-close').addEventListener('click', () => dlg.close ? dlg.close() : dlg.removeAttribute('open'));
+$('#btn-draft-export').addEventListener('click', () => toast('デモのため、出力は行いません'));
+
+/* ---------- 3D map ---------- */
+const three = {};
+function init3D() {
+  const map = $('#map');
+  if (typeof THREE === 'undefined') { map.classList.add('no3d'); return; }
+  let renderer;
+  try { renderer = new THREE.WebGLRenderer({ antialias: true }); } catch (e) { map.classList.add('no3d'); return; }
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  map.prepend(renderer.domElement);
+  renderer.domElement.setAttribute('aria-label', '3D軌道マップ');
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(38, 1, 0.5, 800);
+  const v = { theta: -0.62, phi: 0.98, radius: 118, target: new THREE.Vector3(0, -2, 0), goal: null };
+  const home = { theta: -0.62, phi: 0.98, radius: 118, target: new THREE.Vector3(0, -2, 0) };
+  let world = null, markers = [], halo = null, labels = [];
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const col = n => new THREE.Color(css(n) || '#888');
+
+  function trackPos(s) {
+    const u = (s - SEC.from) / (SEC.to - SEC.from);
+    const x = (u - 0.5) * 128, z = 11 * Math.sin(u * Math.PI * 1.6) - 4;
+    const dx = 128, dz = 11 * Math.PI * 1.6 * Math.cos(u * Math.PI * 1.6), L = Math.hypot(dx, dz);
+    return { x, z, nx: -dz / L, nz: dx / L };
+  }
+  const at = (s, d, y) => { const p = trackPos(s); return new THREE.Vector3(p.x + p.nx * d, y, p.z + p.nz * d); };
+  const sm = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+  function ground(s, d) {
+    const ad = Math.abs(d);
+    let h = -1.1 - sm(3, 9, ad) * 1.6 + 0.35 * Math.sin(s * 0.013 + d * 0.4) + 0.25 * Math.sin(s * 0.031 - d * 0.23);
+    h -= sm(13120, 13230, s) * (1 - sm(13440, 13550, s)) * (8.5 + 0.6 * Math.sin(d * 0.3));
+    h += sm(13540, 13640, s) * (1 - sm(14100, 14200, s)) * Math.max(0, ad - 4) * 0.55;
+    const t = (s - 14080) / 1000;
+    if (t > 0 && t < 1) { const Hh = 17 * Math.pow(Math.sin(Math.PI * t), 0.55); h = Math.max(h, Hh * Math.exp(-(d * d) / (2 * 15 * 15)) - 1); }
+    if (!inTunnel(s) && ad < 3.6) h = Math.min(h, -0.9);
+    return h;
+  }
+
+  function build() {
+    if (world) { scene.remove(world); world.traverse(o => { o.geometry && o.geometry.dispose(); o.material && o.material.dispose(); }); }
+    world = new THREE.Group(); scene.add(world);
+    scene.background = col('--pc-bg');
+    const r = rng(42);
+    const P = [], K = [];
+    const push = (vec, c) => { P.push(vec.x, vec.y, vec.z); K.push(c.r, c.g, c.b); };
+    const cG = col('--pc-ground'), cG2 = col('--pc-ground-2'), cR = col('--pc-river'), cB = col('--pc-ballast'), cS = col('--pc-struct');
+    // terrain
+    for (let s = SEC.from; s <= SEC.to; s += 11) {
+      for (let d = -25; d <= 25; d += 1.25) {
+        const js = s + (r() - 0.5) * 8, jd = d + (r() - 0.5) * 0.9;
+        if (Math.abs(jd) < 2.5 && !inBridge(js) && !inTunnel(js)) continue;
+        const h = ground(js, jd);
+        let c = cG.clone().lerp(cG2, Math.min(1, Math.max(0, (h + 3) / 18)));
+        if (inBridge(js) && h < -8 && Math.abs(jd) < 11) c = cR;
+        push(at(js, jd, h + (r() - 0.5) * 0.15), c);
+      }
+    }
+    // ballast (measured, outside bridge & tunnel)
+    for (let s = SEC.from; s <= SEC.to; s += 4) {
+      if (inBridge(s) || inTunnel(s) || isInterp(s)) continue;
+      for (let d = -2.3; d <= 2.3; d += 0.38) push(at(s + (r() - 0.5) * 3, d, -0.25 - 0.13 * Math.abs(d) + (r() - 0.5) * 0.08), cB);
+    }
+    // bridge deck (data gap where interpolated)
+    for (let s = 13150; s <= 13520; s += 2.5) {
+      if (isInterp(s)) continue;
+      for (let d = -2.4; d <= 2.4; d += 0.4) push(at(s, d, -0.35), cS);
+      push(at(s, -2.4, -1.5), cS); push(at(s, 2.4, -1.5), cS);
+    }
+    // piers & abutments
+    [13150, ...PIERS, 13520].forEach((s, i, arr) => {
+      const g = ground(s, 0), wide = i === 0 || i === arr.length - 1 ? 2.2 : 1.2;
+      for (let y = -1.6; y > g; y -= 0.3) {
+        for (let a = 0; a < 10; a++) { const ang = a / 10 * Math.PI * 2; const p = at(s + Math.cos(ang) * wide * 12, Math.sin(ang) * 1.5, y); push(p, cS); }
+      }
+    });
+    // tunnel portals
+    [14200, 14980].forEach(s => {
+      for (let a = 0; a <= 40; a++) { const ang = a / 40 * Math.PI; push(at(s, 3.2 * Math.cos(ang), -0.5 + 4 * Math.sin(ang)), cS); }
+      for (let d = -7; d <= 7; d += 0.5) for (let y = -0.5; y < 7; y += 0.5) { const inside = (d / 3.4) ** 2 + ((y + 0.5) / 4.2) ** 2 < 1; if (!inside && y < ground(s, d) + 0.3) push(at(s, d, y), cS); }
+    });
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(P, 3));
+    geo.setAttribute('color', new THREE.Float32BufferAttribute(K, 3));
+    world.add(new THREE.Points(geo, new THREE.PointsMaterial({ size: 0.34, vertexColors: true, sizeAttenuation: true })));
+
+    // rails
+    const railCol = col('--pc-rail'), intCol = col('--pc-interp');
+    COVERAGE.forEach(cv => {
+      [-0.6, 0.6].forEach(off => {
+        const pts = []; for (let s = cv.from; s <= cv.to + 0.1; s += 8) pts.push(at(Math.min(s, cv.to), off, 0.12));
+        const g = new THREE.BufferGeometry().setFromPoints(pts);
+        let line;
+        if (cv.kind === 'measured') line = new THREE.Line(g, new THREE.LineBasicMaterial({ color: railCol }));
+        else { line = new THREE.Line(g, new THREE.LineDashedMaterial({ color: intCol, dashSize: 0.9, gapSize: 0.6, depthTest: false, transparent: true })); line.computeLineDistances(); line.renderOrder = 10; }
+        world.add(line);
+      });
+      if (cv.kind === 'interp') {
+        const dots = []; for (let s = cv.from; s <= cv.to; s += 14) dots.push(at(s, 0, 0.15));
+        const dg = new THREE.BufferGeometry().setFromPoints(dots);
+        const dp = new THREE.Points(dg, new THREE.PointsMaterial({ color: intCol, size: 0.75, sizeAttenuation: true, depthTest: false, transparent: true }));
+        dp.renderOrder = 11; world.add(dp);
+      }
+    });
+    buildMarkers();
+    buildLabels();
+  }
+
+  function markerPos(c) {
+    const s = c.km;
+    switch (c.pos) {
+      case 'pier': return at(s, 0, ground(s, 0) * 0.5 - 0.8);
+      case 'girder': return at(s, 2.6, -1.4);
+      case 'abut': return at(s, 0, -3);
+      case 'portal': return at(s, 0, 2.4);
+      case 'slope': { const d = -7; return at(s, d, ground(s, d) + 0.8); }
+      case 'drain': return at(s, 3.2, -0.2);
+      default: return at(s, 0, 2);
+    }
+  }
+  function buildMarkers() {
+    markers.forEach(m => { world.remove(m); m.geometry.dispose(); m.material.dispose(); }); markers = [];
+    if (halo) { world.remove(halo); halo.geometry.dispose(); halo.material.dispose(); halo = null; }
+    const vis = C.filter(c => state.filter === 'all' || c.status === state.filter);
+    vis.forEach(c => {
+      const m = new THREE.Mesh(new THREE.SphereGeometry(0.85, 20, 14), new THREE.MeshBasicMaterial({ color: col('--h-' + eff(c)), depthTest: false, transparent: true, opacity: c.judged ? 1 : 0.85 }));
+      m.position.copy(markerPos(c)); m.renderOrder = 20; m.userData.id = c.id; world.add(m); markers.push(m);
+      const stemTop = m.position.clone(), foot = at(c.km, 0, c.pos === 'pier' || c.pos === 'abut' ? -1.5 : 0.1);
+      if (c.pos === 'portal') { const sg = new THREE.BufferGeometry().setFromPoints([foot, stemTop]); const st = new THREE.Line(sg, new THREE.LineBasicMaterial({ color: col('--h-' + eff(c)) })); world.add(st); markers.push(st); }
+    });
+    const sel = C.find(c => c.id === state.sel);
+    if (sel && vis.includes(sel)) {
+      halo = new THREE.Mesh(new THREE.RingGeometry(1.35, 1.75, 48), new THREE.MeshBasicMaterial({ color: col('--pc-sel'), side: THREE.DoubleSide, depthTest: false, transparent: true }));
+      halo.position.copy(markerPos(sel)); halo.renderOrder = 21; world.add(halo);
+    }
+  }
+  function buildLabels() {
+    labels.forEach(l => l.el.remove()); labels = [];
+    const add = (text, pos, cls) => { const el = document.createElement('div'); el.className = 'lbl3d' + (cls ? ' ' + cls : ''); el.textContent = text; map.appendChild(el); labels.push({ el, pos }); };
+    add('B-14 橋梁', at(13335, 0, 3.2));
+    add('T-07 トンネル', at(14590, 0, ground(14590, 0) + 1.5));
+    add('補間区間（推定位置）', at(14590, 0, 1.2), 'interp');
+    add('12k400', at(12420, 0, 1.4)); add('15k600', at(15580, 0, 1.4));
+  }
+
+  function resize() {
+    const w = map.clientWidth, h = map.clientHeight; if (!w || !h) return;
+    renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+  }
+  three.resize = resize;
+  three.refresh = () => buildMarkers();
+  three.focusKm = km => {
+    const p = at(km, 0, 0); v.goal = { target: p, radius: 48 };
+    if (reduceMotion) { v.target.copy(p); v.radius = 48; v.goal = null; }
+  };
+  three.focus = id => {
+    const c = C.find(x => x.id === id); if (!c) return;
+    const p = markerPos(c); v.goal = { target: p, radius: 48 };
+    if (reduceMotion) { v.target.copy(p); v.radius = 48; v.goal = null; }
+  };
+  $('#btn-focus').addEventListener('click', () => state.sel && three.focus(state.sel));
+  $('#btn-overview').addEventListener('click', () => { v.theta = home.theta; v.phi = home.phi; v.goal = { target: home.target.clone(), radius: home.radius }; if (reduceMotion) { v.target.copy(home.target); v.radius = home.radius; v.goal = null; } });
+
+  // controls
+  const el = renderer.domElement, ptrs = new Map(); let moved = 0, pinchD = 0;
+  el.addEventListener('pointerdown', e => { el.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY }); moved = 0; if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinchD = Math.hypot(a.x - b.x, a.y - b.y); } });
+  el.addEventListener('pointermove', e => {
+    if (!ptrs.has(e.pointerId)) return;
+    const p = ptrs.get(e.pointerId), dx = e.clientX - p.x, dy = e.clientY - p.y;
+    ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (ptrs.size === 1) { moved += Math.abs(dx) + Math.abs(dy); v.theta -= dx * 0.006; v.phi = Math.min(1.45, Math.max(0.22, v.phi - dy * 0.006)); }
+    else if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; const d = Math.hypot(a.x - b.x, a.y - b.y); if (pinchD) v.radius = Math.min(220, Math.max(16, v.radius * pinchD / d)); pinchD = d; moved = 99; v.goal = null; }
+  });
+  const end = e => {
+    if (ptrs.size === 1 && moved < 6) pick(e);
+    ptrs.delete(e.pointerId); if (ptrs.size < 2) pinchD = 0;
+  };
+  el.addEventListener('pointerup', end); el.addEventListener('pointercancel', e => { ptrs.delete(e.pointerId); pinchD = 0; });
+  el.addEventListener('wheel', e => { e.preventDefault(); v.goal = null; v.radius = Math.min(220, Math.max(16, v.radius * (1 + Math.sign(e.deltaY) * 0.09))); }, { passive: false });
+  const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+  function pick(e) {
+    const rect = el.getBoundingClientRect();
+    ndc.set(((e.clientX - rect.left) / rect.width) * 2 - 1, -((e.clientY - rect.top) / rect.height) * 2 + 1);
+    ray.setFromCamera(ndc, camera);
+    const hits = ray.intersectObjects(markers.filter(m => m.isMesh));
+    if (hits.length) select(hits[0].object.userData.id, false);
+  }
+
+  const vtmp = new THREE.Vector3();
+  function frame(t) {
+    if (v.goal) {
+      v.target.lerp(v.goal.target, 0.09); v.radius += (v.goal.radius - v.radius) * 0.09;
+      if (v.target.distanceTo(v.goal.target) < 0.05 && Math.abs(v.goal.radius - v.radius) < 0.2) v.goal = null;
+    }
+    camera.position.set(v.target.x + v.radius * Math.sin(v.phi) * Math.sin(v.theta), v.target.y + v.radius * Math.cos(v.phi), v.target.z + v.radius * Math.sin(v.phi) * Math.cos(v.theta));
+    camera.lookAt(v.target);
+    if (halo) { halo.quaternion.copy(camera.quaternion); if (!reduceMotion) { const k = 1 + 0.14 * Math.sin(t / 260); halo.scale.set(k, k, k); } }
+    const w = map.clientWidth, h = map.clientHeight;
+    labels.forEach(l => {
+      vtmp.copy(l.pos).project(camera);
+      const vis = vtmp.z < 1 && Math.abs(vtmp.x) < 1.05 && Math.abs(vtmp.y) < 1.05;
+      l.el.style.display = vis ? '' : 'none';
+      if (vis) l.el.style.transform = `translate(${((vtmp.x + 1) / 2 * w).toFixed(1)}px, ${((1 - vtmp.y) / 2 * h).toFixed(1)}px) translate(-50%, -120%)`;
+    });
+    renderer.render(scene, camera);
+    requestAnimationFrame(frame);
+  }
+  build(); resize();
+  new ResizeObserver(resize).observe(map);
+  const rebuild = () => build();
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', rebuild);
+  new MutationObserver(rebuild).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  requestAnimationFrame(frame);
+}
+
+/* ---------- flight schedule ---------- */
+const DAYS = [
+  { d: '11/30', w: '月', wx: '晴れ', wind: 3, closure: true },
+  { d: '12/1', w: '火', wx: 'くもり', wind: 4, closure: true },
+  { d: '12/2', w: '水', wx: '雨', wind: 6, closure: true },
+  { d: '12/3', w: '木', wx: '晴れ', wind: 8, closure: true },
+  { d: '12/4', w: '金', wx: 'くもり', wind: 5.5, closure: true },
+  { d: '12/5', w: '土', wx: '晴れ', wind: 2, closure: false },
+  { d: '12/6', w: '日', wx: '晴れ', wind: 3, closure: true },
+];
+const RULE = { windStop: 7, windWarn: 5, cap: 120 };
+const ROWS = [
+  { id: 'R1', name: '盛土・B-14 橋梁', km: '12k400–13k520' },
+  { id: 'R2', name: '切土', km: '13k520–14k200' },
+  { id: 'R3', name: 'T-07 トンネル坑口', km: '14k200–14k980' },
+  { id: 'R4', name: '盛土', km: '14k980–15k600' },
+];
+const rowOf = km => km < 13520 ? 'R1' : km < 14200 ? 'R2' : km < 14980 ? 'R3' : 'R4';
+const rowName = id => (ROWS.find(r => r.id === id) || {}).name || '';
+const TYPE_LABEL = { video: '全景動画', still: '部材単位の静止画', close: '近接静止画', survey: '写真測量' };
+const SHOOT = { video: '4K動画（例）', still: '静止画・重複率80%（例）', close: '近接静止画・ホバリング撮影', survey: '写真測量・標定点（GCP）4点（例）' };
+const FLIGHTS = [
+  { id: 'F1', row: 'R1', name: 'B-14 全景動画（3D化・位置合わせ用）', type: 'video', from: 13100, to: 13580, dur: 25, alt: 30, off: 15, day: 0 },
+  { id: 'F2', row: 'R1', name: 'B-14 橋脚P1〜P6 部材単位の静止画', type: 'still', from: 13150, to: 13520, dur: 40, alt: 8, off: 8, day: 0 },
+  { id: 'F3', row: 'R1', name: 'P3・P4 近接静止画（ひび割れ幅の推定用）', type: 'close', from: 13230, to: 13360, dur: 25, alt: 6, off: 4, day: 1, targets: [13262, 13330] },
+  { id: 'F4', row: 'R2', name: '切土のり面 全景動画', type: 'video', from: 13520, to: 14200, dur: 30, alt: 30, off: 15, day: null },
+  { id: 'F5', row: 'R1', name: '12k780–13k000 写真測量（沈下の再確認）', type: 'survey', from: 12780, to: 13000, dur: 35, alt: 40, off: 0, day: null },
+  { id: 'F6', row: 'R4', name: '15k000–15k600 全景動画', type: 'video', from: 14980, to: 15600, dur: 25, alt: 30, off: 15, day: 6 },
+];
+const sched = { sel: 'F5' };
+function syncReshoot() {
+  C.filter(c => c.status === 'reshoot').forEach(c => {
+    if (FLIGHTS.some(f => f.src === c.id)) return;
+    FLIGHTS.push({ id: 'F' + (FLIGHTS.length + 1), src: c.id, row: rowOf(c.km), name: `${c.part} 近接静止画（再撮影）`, type: 'close', from: c.km - 30, to: c.km + 30, dur: 20, alt: 4, off: 5, day: null, targets: [c.km] });
+  });
+}
+function dayStatus(day) {
+  if (!day.closure) return { ok: false, level: 'ng', text: '線路閉鎖なし' };
+  if (day.wx === '雨') return { ok: false, level: 'ng', text: '降雨の予報' };
+  if (day.wind >= RULE.windStop) return { ok: false, level: 'ng', text: `風速${day.wind}m/sの予報` };
+  if (day.wind >= RULE.windWarn) return { ok: true, level: 'warn', text: `風速${day.wind}m/s（注意）` };
+  return { ok: true, level: 'ok', text: '飛行可' };
+}
+const dayLoad = i => FLIGHTS.filter(f => f.day === i).reduce((a, f) => a + f.dur, 0);
+const ST_LABEL = { ok: '飛行可', warn: '注意', ng: '飛行不可' };
+
+function renderSched() {
+  syncReshoot();
+  const sel = FLIGHTS.find(f => f.id === sched.sel) || null;
+  let h = '<div></div>';
+  DAYS.forEach((d, i) => {
+    const st = dayStatus(d), ld = dayLoad(i);
+    h += `<div class="cal-h"><div><span class="dt">${d.d}</span><span class="wk">（${d.w}）</span></div>
+      <div>${d.wx}　${d.wind}m/s</div><div title="${d.closure ? '線路閉鎖 01:10–03:50（例）' : ''}">${d.closure ? '線路閉鎖あり' : '線路閉鎖なし'}</div>
+      <span class="st st-${st.level}" title="${st.text}">${ST_LABEL[st.level]}</span>
+      <div class="load"><i style="width:${Math.min(100, ld / RULE.cap * 100)}%"></i></div><div class="load-t">飛行 ${ld}/${RULE.cap}分</div></div>`;
+  });
+  ROWS.forEach(r => {
+    h += `<div class="cal-r"><b>${r.name}</b><br><span class="km">${r.km}</span></div>`;
+    DAYS.forEach((d, i) => {
+      const st = dayStatus(d), target = sel && sel.row === r.id && st.ok && sel.day !== i;
+      const fl = FLIGHTS.filter(f => f.row === r.id && f.day === i);
+      h += `<div class="cell ${st.ok ? '' : 'ng'} ${target ? 'target' : ''}" data-day="${i}" data-row="${r.id}" tabindex="0" role="button" aria-label="${d.d} ${r.name}${st.ok ? '' : '（' + st.text + '）'}">
+        ${fl.map(f => `<button class="fchip ft-${f.type} ${f.id === sched.sel ? 'is-sel' : ''}" data-f="${f.id}">${f.id}　${TYPE_LABEL[f.type]}　${f.dur}分</button>`).join('')}</div>`;
+    });
+  });
+  $('#cal').innerHTML = h;
+  $$('#cal .cell').forEach(c => {
+    const go = () => assignTo(+c.dataset.day, c.dataset.row);
+    c.addEventListener('click', e => { if (!e.target.closest('.fchip')) go(); });
+    c.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target === c) { e.preventDefault(); go(); } });
+  });
+  $$('#cal .fchip').forEach(b => b.addEventListener('click', () => { sched.sel = b.dataset.f; renderSched(); }));
+
+  const q = FLIGHTS.filter(f => f.day == null);
+  $('#q-count').textContent = q.length ? `${q.length}件` : '';
+  $('#queue').innerHTML = q.length ? q.map(f => `<li><button class="qitem ${f.id === sched.sel ? 'is-sel' : ''}" data-f="${f.id}">
+      <span class="qcode ft-${f.type}">${f.id}</span>
+      <span><span class="qname">${esc(f.name)}</span><span class="qmeta">${rowName(f.row)}　${TYPE_LABEL[f.type]}　${f.dur}分</span></span></button></li>`).join('')
+    : '<li class="empty">すべての飛行を割り当てました。</li>';
+  $$('#queue .qitem').forEach(b => b.addEventListener('click', () => { sched.sel = b.dataset.f; renderSched(); }));
+  renderRoute(sel || q[0] || FLIGHTS[0]);
+}
+
+function assignTo(dayIdx, rowId) {
+  const f = FLIGHTS.find(x => x.id === sched.sel);
+  const day = DAYS[dayIdx], st = dayStatus(day);
+  if (!f) { toast('先に飛行を選んでください'); return; }
+  if (f.row !== rowId) { toast(`${f.id}は「${rowName(f.row)}」区間の飛行です`); return; }
+  if (!st.ok) { toast(`${day.d}は飛行できません（${st.text}）`); return; }
+  if (f.day === dayIdx) return;
+  if (dayLoad(dayIdx) + f.dur > RULE.cap) { toast(`${day.d}は1晩の飛行時間の上限（${RULE.cap}分）を超えます`); return; }
+  f.day = dayIdx;
+  toast(`${f.id}を${day.d}（${day.w}）に割り当てました${st.level === 'warn' ? '。風速に注意してください' : ''}`);
+  renderSched();
+}
+
+$('#btn-auto').addEventListener('click', () => {
+  syncReshoot();
+  const q = FLIGHTS.filter(f => f.day == null).sort((a, b) => (b.src ? 1 : 0) - (a.src ? 1 : 0));
+  const order = [...DAYS.keys()].filter(i => dayStatus(DAYS[i]).ok).sort((a, b) => (dayStatus(DAYS[a]).level === 'warn') - (dayStatus(DAYS[b]).level === 'warn') || a - b);
+  let ok = 0, ng = 0;
+  q.forEach(f => { const i = order.find(i => dayLoad(i) + f.dur <= RULE.cap); if (i == null) ng++; else { f.day = i; ok++; } });
+  toast(!q.length ? '未割り当ての飛行はありません' : ng ? `${ok}件を割り当てました。${ng}件は条件に合う日がありません` : `${ok}件を割り当てました`);
+  renderSched();
+});
+
+function renderRoute(f) {
+  if (!f) return;
+  $('#route-title').textContent = `飛行ルート　${f.id}　${f.name}`;
+  $('#route-svg').innerHTML = routeSVG(f);
+  $('#route-facts').innerHTML = [
+    ['区間', `<span class="km">${fmtKm(f.from)}–${fmtKm(f.to)}</span>`], ['方式', TYPE_LABEL[f.type]], ['撮影設定', SHOOT[f.type]],
+    ['飛行高度（例）', `${f.alt}m`], ['構造物からの距離（例）', f.off ? `${f.off}m` : '—（上空から撮影）'], ['想定時間', `${f.dur}分`],
+    ['割り当て', f.day == null ? '未割り当て' : `${DAYS[f.day].d}（${DAYS[f.day].w}）`],
+  ].map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
+  $('#route-actions').innerHTML = f.day == null ? '' : `<button class="btn" id="btn-unassign">割り当てを外す</button>`;
+  const ub = $('#btn-unassign');
+  if (ub) ub.addEventListener('click', () => { f.day = null; sched.sel = f.id; toast(`${f.id}の割り当てを外しました`); renderSched(); });
+}
+
+function routeSVG(f) {
+  const W = 900, H = 300, a = f.from - 80, b = f.to + 80, ty = 150;
+  const X = s => 50 + (s - a) / (b - a) * (W - 100);
+  const pxPerM = (W - 100) / (b - a);
+  let o = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(f.name)}の飛行ルート（模式図）"><defs>
+    <pattern id="rz" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" style="fill:var(--pc-bg)"/><rect width="2" height="8" style="fill:var(--h-A1)" opacity=".4"/></pattern>
+    <marker id="ra" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" style="fill:var(--accent)"/></marker></defs>
+    <rect width="${W}" height="${H}" style="fill:var(--pc-bg)"/>`;
+  STRUCTURES.forEach(st => {
+    const x1 = Math.max(X(st.from), 0), x2 = Math.min(X(st.to), W);
+    if (x2 - x1 < 2) return;
+    const fill = st.type === 'bridge' ? 'var(--primary)' : st.type === 'tunnel' ? 'var(--tunnel)' : 'var(--pc-ground)';
+    o += `<rect x="${x1}" y="${ty - 40}" width="${x2 - x1}" height="80" style="fill:${fill}" opacity=".2"/>`;
+    if (x2 - x1 > 70) o += `<text x="${(x1 + x2) / 2}" y="22" text-anchor="middle" font-size="13" style="fill:var(--ink-2)">${st.name}</text>`;
+  });
+  o += `<rect x="0" y="${ty - 18}" width="${W}" height="36" fill="url(#rz)"/>`;
+  [-4, 4].forEach(dy => { o += `<line x1="0" x2="${W}" y1="${ty + dy}" y2="${ty + dy}" style="stroke:var(--pc-rail)" stroke-width="2"/>`; });
+  [13150, ...PIERS, 13520].forEach(p => { if (p > a && p < b) o += `<rect x="${X(p) - 5}" y="${ty + 22}" width="10" height="12" style="fill:var(--primary)"/>`; });
+  [14200, 14980].forEach(p => { if (p > a && p < b) o += `<line x1="${X(p)}" x2="${X(p)}" y1="${ty - 40}" y2="${ty + 40}" style="stroke:var(--ink)" stroke-width="3"/>`; });
+  const hx = 30, hy = H - 34;
+  let pts = [], wps = [], mark = true;
+  if (f.type === 'video') pts = [[hx, hy], [X(f.from), ty - 82], [X(f.to), ty - 82], [X(f.to), ty + 82], [X(f.from), ty + 82], [hx, hy]];
+  else if (f.type === 'survey') {
+    mark = false; pts = [[hx, hy]];
+    for (let k = 0, y = ty - 110; y <= ty + 110.1; y += 27.5, k++) { const L = X(f.from), R = X(f.to); pts.push(...(k % 2 ? [[R, y], [L, y]] : [[L, y], [R, y]])); }
+    pts.push([hx, hy]);
+  } else if (f.type === 'still') {
+    pts = [[hx, hy], [X(f.from), ty + 72]];
+    PIERS.filter(p => p >= f.from && p <= f.to).forEach(p => { wps.push([X(p), ty + 56]); pts.push([X(p) - 12, ty + 72], [X(p) - 12, ty + 56], [X(p) + 12, ty + 56], [X(p) + 12, ty + 72]); });
+    pts.push([X(f.to), ty + 72], [hx, hy]);
+  } else {
+    (f.targets || []).forEach(t => wps.push([X(t), ty + 62]));
+    pts = [[hx, hy], ...wps, [hx, hy]];
+  }
+  o += `<polyline points="${pts.map(p => p[0].toFixed(1) + ',' + p[1].toFixed(1)).join(' ')}" fill="none" style="stroke:var(--accent)" stroke-width="2.5" stroke-linejoin="round" ${mark ? 'marker-mid="url(#ra)"' : ''}/>`;
+  if (f.type === 'survey') [[X(f.from), ty - 118], [X(f.to), ty - 118], [X(f.from), ty + 118], [X(f.to), ty + 118]].forEach(([x, y]) => {
+    o += `<path d="M${x} ${y - 9} L${x + 9} ${y + 7} L${x - 9} ${y + 7} Z" style="fill:var(--signal);stroke:var(--signal-ink)" stroke-width="1"/>`;
+  });
+  wps.forEach(([x, y], i) => {
+    if (f.type === 'close') o += `<line x1="${x}" y1="${y - 12}" x2="${x}" y2="${ty + 30}" style="stroke:var(--teal)" stroke-width="2" marker-end="url(#ra)"/>`;
+    o += `<circle cx="${x}" cy="${y}" r="11" style="fill:var(--accent)"/><text x="${x}" y="${y + 4.5}" text-anchor="middle" font-size="12" font-weight="700" style="fill:var(--surface);font-family:var(--font-num)">${i + 1}</text>`;
+  });
+  o += `<circle cx="${hx}" cy="${hy}" r="14" style="fill:var(--surface);stroke:var(--ink)" stroke-width="2"/><text x="${hx}" y="${hy + 5}" text-anchor="middle" font-size="14" font-weight="700" style="fill:var(--ink)">H</text>
+    <text x="${hx + 18}" y="${H - 5}" font-size="12" style="fill:var(--ink-2)">離着陸地点（例）</text>`;
+  const sb = 50 * pxPerM >= 40 ? 50 : 100;
+  o += `<line x1="${W - 30 - sb * pxPerM}" x2="${W - 30}" y1="${H - 18}" y2="${H - 18}" style="stroke:var(--ink)" stroke-width="3"/><text x="${W - 30}" y="${H - 26}" text-anchor="end" font-size="12" style="fill:var(--ink-2)">${sb}m</text>`;
+  o += `<text x="10" y="${ty - 24}" font-size="12" style="fill:var(--ink-2)">架線・設備の離隔範囲（例）</text>`;
+  if (f.type === 'survey') o += `<text x="${X(f.to) + 14}" y="${ty - 114}" font-size="12" style="fill:var(--ink-2)">標定点（GCP）</text>`;
+  return o + '</svg>';
+}
+
+/* ---------- displacement analysis ---------- */
+const anal = { view: 'settle', sel: 'D1', epoch: '2025' };
+const gss = (x, m, sd) => Math.exp(-((x - m) ** 2) / (2 * sd * sd));
+const epochK = () => anal.epoch === '2024' ? 1.6 : 1;
+function dz(s, d) {
+  const k = epochK();
+  let v = 1.3 * Math.sin(s * 0.013 + d * 0.21) * Math.cos(d * 0.17 - s * 0.004) + 1.0 * Math.sin(s * 0.0071 - d * 0.29) + 0.7 * Math.sin(s * 0.031 + d * 0.6);
+  v += k * (-34 * gss(s, 12885, 45) * gss(d, -8, 6) - 4 * gss(s, 12885, 40) * gss(d, 0, 5));
+  v += k * (-22 * gss(s, 13532, 20) * gss(d, 0, 9));
+  v += k * (-9 * gss(s, 15120, 32) * gss(d, 5, 6));
+  return v;
+}
+const tsN = (s, p) => 1.3 * Math.sin(s * 0.037 + p) + 0.9 * Math.sin(s * 0.011 + 2 * p) + 0.6 * Math.sin(s * 0.083 + 3 * p);
+const lev = (s, src) => src === 'drone' ? dz(s, 0) + tsN(s, 1) * 1.2 : dz(s, 0) * 0.85 + tsN(s, 4) * 0.6;
+const ali = (s, src) => { const base = epochK() * 9 * gss(s, 12885, 24); return src === 'drone' ? base + tsN(s, 2) * 1.4 : base * 0.85 + tsN(s, 5) * 0.7; };
+
+const FINDINGS = [
+  { id: 'D1', from: 12820, to: 12950, metric: 'settle', view: 'settle', kindLabel: '沈下', title: '盛土のり肩の沈下', where: '軌道の右側', conf: '中',
+    relText: '点検確認の「のり面の小崩れ」（12k880）と同じ範囲です。', rec: '現地測量で沈下の範囲を確認', flight: 'F5',
+    cand: { struct: '盛土区間', part: '右側のり肩', defect: '路盤・のり肩の沈下', ai: 'A2', kind: 'settle', pos: 'slope' } },
+  { id: 'D2', from: 13500, to: 13565, metric: 'settle', view: 'settle', kindLabel: '沈下', title: '橋台背面の沈下', where: '軌道中心付近', conf: '中',
+    relText: '同じ位置で高低の変化も見られます。', rec: '検測車データと照合',
+    cand: { struct: 'B-14 橋梁', part: 'A2 橋台背面', defect: '路盤の沈下', ai: 'B', kind: 'settle', pos: 'track' } },
+  { id: 'D3', from: 15080, to: 15160, metric: 'settle', view: 'settle', kindLabel: '沈下', title: '側溝付近の沈下', where: '軌道の左側', conf: '低',
+    relText: '「排水不良（滞水）」（15k120）の付近です。誤差の範囲の可能性があります。', rec: '次回の比較で継続して確認',
+    cand: { struct: '盛土区間', part: '側溝付近', defect: '路盤の沈下（軽微）', ai: 'C', kind: 'settle', pos: 'drain' } },
+  { id: 'D4', from: 12860, to: 12910, metric: 'align', view: 'track', kindLabel: '通り', title: '通りの変化', where: '軌道', conf: '低',
+    relText: '値は誤差の範囲内ですが、D1の沈下範囲と重なるため抽出しました。', rec: '検測車データと照合',
+    cand: { struct: '盛土区間', part: '軌道（通り）', defect: '通りの変化', ai: 'B', kind: 'track', pos: 'track' } },
+];
+function findVal(f) {
+  let v = 0;
+  for (let s = f.from; s <= f.to; s += 5) {
+    if (f.metric === 'settle') { for (let d = -25; d <= 25; d += 1) v = Math.min(v, dz(s, d)); }
+    else { const a = ali(s, 'drone'); if (Math.abs(a) > Math.abs(v)) v = a; }
+  }
+  const r = Math.round(v);
+  return `${f.metric === 'settle' ? '最大 ' : ''}約${r > 0 ? '+' : r < 0 ? '−' : ''}${Math.abs(r)}mm`;
+}
+
+function lineChart(o) {
+  const W = o.W, H = o.H, L = 46, R = 12, T = 24, B = 26;
+  const X = s => L + (s - SEC.from) / (SEC.to - SEC.from) * (W - L - R);
+  const Y = v => T + (o.yMax - v) / (o.yMax - o.yMin) * (H - T - B);
+  let s = `<svg class="svgchart" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${o.label}"><defs><pattern id="${o.id}h" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="6" height="6" style="fill:var(--surface)"/><rect width="1.6" height="6" style="fill:var(--ink-3)" opacity=".45"/></pattern></defs>`;
+  s += `<rect x="${L}" y="${Y(o.band)}" width="${W - L - R}" height="${Y(-o.band) - Y(o.band)}" style="fill:var(--surface-2)"/>`;
+  if (o.hl) s += `<rect x="${X(o.hl[0]) - 3}" y="${T}" width="${X(o.hl[1]) - X(o.hl[0]) + 6}" height="${H - T - B}" style="fill:var(--accent)" opacity=".14"/>`;
+  COVERAGE.filter(c => c.kind === 'interp').forEach(c => {
+    s += `<rect x="${X(c.from)}" y="${T}" width="${X(c.to) - X(c.from)}" height="${H - T - B}" fill="url(#${o.id}h)"/>`;
+    if (X(c.to) - X(c.from) > 70) s += `<text x="${(X(c.from) + X(c.to)) / 2}" y="${T + 16}" text-anchor="middle" font-size="11.5" style="fill:var(--ink-2)">対象外（補間区間）</text>`;
+  });
+  o.ticks.forEach(v => { s += `<line x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}" style="stroke:var(--line)" ${v === 0 ? 'stroke-width="1.5"' : ''}/><text x="${L - 6}" y="${Y(v) + 4}" text-anchor="end" font-size="12" style="fill:var(--ink-3);font-family:var(--font-num)">${v > 0 ? '+' : v < 0 ? '−' : ''}${Math.abs(v)}</text>`; });
+  s += `<text x="${L - 6}" y="11" text-anchor="end" font-size="11" style="fill:var(--ink-3)">mm</text>`;
+  (o.thresholds || []).forEach(t => { s += `<line x1="${L}" x2="${W - R}" y1="${Y(t.v)}" y2="${Y(t.v)}" style="stroke:var(--h-A1)" stroke-dasharray="6 4" stroke-width="1.5"/><text x="${W - R - 4}" y="${Y(t.v) - 5}" text-anchor="end" font-size="11.5" style="fill:var(--h-A1)">${t.label}</text>`; });
+  o.series.forEach(se => {
+    let d = '', pen = false;
+    for (let x = SEC.from; x <= SEC.to; x += 6) {
+      if (isInterp(x) || (se.only && !se.only(x))) { pen = false; continue; }
+      const v = Math.max(o.yMin, Math.min(o.yMax, se.fn(x)));
+      d += `${pen ? 'L' : 'M'}${X(x).toFixed(1)} ${Y(v).toFixed(1)}`; pen = true;
+    }
+    s += `<path d="${d}" fill="none" style="stroke:${se.color}" stroke-width="${se.w || 2}" ${se.dash ? 'stroke-dasharray="5 4"' : ''} stroke-linejoin="round"/>`;
+  });
+  for (let k = 12500; k <= 15500; k += 500) s += `<text x="${X(k)}" y="${H - 6}" text-anchor="middle" font-size="13" style="fill:var(--ink-2);font-family:var(--font-num)">${fmtKm(k)}</text>`;
+  return s + '</svg>';
+}
+
+function drawHeat(cv, hl) {
+  const W = cv.clientWidth || 800, H = 200, dpr = Math.min(window.devicePixelRatio || 1, 2);
+  cv.width = W * dpr; cv.height = H * dpr;
+  const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  const hex = h => { h = h.replace('#', ''); return [0, 2, 4].map(i => parseInt(h.substr(i, 2), 16)); };
+  const c0 = hex(css('--heat-0')), n1 = hex(css('--heat-neg1')), n2 = hex(css('--heat-neg2')), p1 = hex(css('--heat-pos'));
+  const mix = (a, b, t) => a.map((x, i) => Math.round(x + (b[i] - x) * t));
+  const ramp = v => Math.abs(v) < 2.5 ? c0 : v > 0 ? mix(c0, p1, Math.min(1, (v - 2.5) / 10)) : (v > -20 ? mix(c0, n1, (-v - 2.5) / 17.5) : mix(n1, n2, Math.min(1, (-v - 20) / 20)));
+  const pad = 46, X = s => pad + (s - SEC.from) / (SEC.to - SEC.from) * (W - pad - 12), S = x => SEC.from + (x - pad) / (W - pad - 12) * (SEC.to - SEC.from);
+  ctx.fillStyle = css('--surface-2'); ctx.fillRect(0, 0, W, H);
+  const cell = 3;
+  for (let x = pad; x < W - 12; x += cell) {
+    const s = S(x + cell / 2);
+    for (let y = 0; y < H; y += cell) {
+      const d = 25 - (y + cell / 2) / H * 50;
+      if (isInterp(s)) { ctx.fillStyle = ((Math.floor(x / 6) + Math.floor(y / 6)) % 2) ? css('--surface-3') : css('--surface-2'); }
+      else { const c = ramp(dz(s, d)); ctx.fillStyle = `rgb(${c[0]},${c[1]},${c[2]})`; }
+      ctx.fillRect(x, y, cell, cell);
+    }
+  }
+  ctx.strokeStyle = css('--pc-rail'); ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(pad, H / 2); ctx.lineTo(W - 12, H / 2); ctx.stroke();
+  ctx.fillStyle = css('--ink-2'); ctx.font = '12px ' + css('--font-ui');
+  ctx.textAlign = 'right'; ctx.fillText('左 25m', pad - 6, 14); ctx.fillText('軌道', pad - 6, H / 2 + 4); ctx.fillText('右 25m', pad - 6, H - 6);
+  ctx.textAlign = 'center';
+  COVERAGE.filter(c => c.kind === 'interp' && X(c.to) - X(c.from) > 80).forEach(c => ctx.fillText('対象外（補間区間）', (X(c.from) + X(c.to)) / 2, 18));
+  if (hl) { ctx.strokeStyle = css('--accent'); ctx.lineWidth = 2.5; ctx.setLineDash([6, 4]); ctx.strokeRect(X(hl[0]) - 3, 3, X(hl[1]) - X(hl[0]) + 6, H - 6); ctx.setLineDash([]); }
+  cv.onclick = e => {
+    const r = cv.getBoundingClientRect(), s = S(e.clientX - r.left);
+    const f = FINDINGS.find(x => x.view === 'settle' && s >= x.from - 30 && s <= x.to + 30);
+    if (f) { anal.sel = f.id; renderAnal(); }
+  };
+}
+
+let analW = 0;
+function renderAnal() {
+  $$('#anal-view button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === anal.view)));
+  $$('#anal-epoch button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.e === anal.epoch)));
+  const body = $('#anal-body'); const W = Math.max(320, Math.round(body.clientWidth || 800)); analW = W;
+  const f = FINDINGS.find(x => x.id === anal.sel);
+  const hl = f && f.view === anal.view ? [f.from, f.to] : null;
+  const yLvl = { yMin: -40, yMax: 15, ticks: [-40, -30, -20, -10, 0, 10], band: 15 };
+  if (anal.view === 'settle') {
+    body.innerHTML = `
+      <div class="chart-block"><h3>標高変化の分布（上から見た図）<span class="lgd">クリックで変位を選択</span></h3>
+        <canvas id="heat" role="img" aria-label="軌道周辺の標高変化の分布。沈下した範囲がオレンジ色で示されている"></canvas>
+        <div class="heat-legend"><span>沈下 −40mm</span><span class="heat-bar"></span><span>+10mm 隆起</span></div></div>
+      <div class="chart-block"><h3>軌道中心の標高変化<span class="lgd"><i></i>ドローン点群（推定）</span><span class="lgd">網掛け：誤差の目安 ±15mm（例）</span></h3>
+        ${lineChart({ id: 'cs', W, H: 230, ...yLvl, label: '軌道中心の標高変化', hl, thresholds: [{ v: -20, label: '要確認（例）' }], series: [{ fn: x => dz(x, 0), color: 'var(--accent)', w: 2.2 }] })}</div>`;
+    drawHeat($('#heat'), hl);
+  } else {
+    const meas = x => true;
+    body.innerHTML = `
+      <div class="chart-block"><h3>高低（上下方向）の変化<span class="lgd"><i></i>ドローン点群（推定）</span><span class="lgd"><i class="dash"></i>検測車データ（参考）</span></h3>
+        ${lineChart({ id: 'lv', W, H: 210, ...yLvl, label: '高低の変化', hl: f && f.metric !== 'align' ? [f.from, f.to] : null, series: [{ fn: x => lev(x, 'car'), color: 'var(--ink-3)', dash: true, only: meas }, { fn: x => lev(x, 'drone'), color: 'var(--accent)', w: 2.2 }] })}</div>
+      <div class="chart-block"><h3>通り（左右方向）の変化<span class="lgd">網掛け：誤差の目安 ±15mm（例）</span></h3>
+        ${lineChart({ id: 'al', W, H: 190, yMin: -20, yMax: 20, ticks: [-20, -10, 0, 10, 20], band: 15, label: '通りの変化', hl: f && f.metric === 'align' ? [f.from, f.to] : null, series: [{ fn: x => ali(x, 'car'), color: 'var(--ink-3)', dash: true }, { fn: x => ali(x, 'drone'), color: 'var(--accent)', w: 2.2 }] })}</div>
+      <p class="mini">ドローン点群から抽出したレール位置の推定値です。検測車データと差が大きい区間は、点群の欠けや撮影条件の影響も考えられます。</p>`;
+  }
+  renderFinds();
+}
+
+function renderFinds() {
+  const interp = COVERAGE.filter(c => c.kind === 'interp').reduce((a, c) => a + c.to - c.from, 0);
+  $('#anal-sum').textContent = `解析対象：実測区間 ${((SEC.to - SEC.from - interp) / 1000).toFixed(2)}km　対象外：補間区間 ${(interp / 1000).toFixed(2)}km`;
+  $('#finds').innerHTML = FINDINGS.map(f => {
+    const added = C.find(c => c.fromFinding === f.id);
+    return `<li class="find ${f.id === anal.sel ? 'is-sel' : ''}" data-id="${f.id}" tabindex="0">
+      <div class="find-top"><span class="kindtag">${f.id}　${f.kindLabel}</span><span class="km">${fmtKm(f.from)}–${fmtKm(f.to)}</span></div>
+      <h3>${f.title}</h3>
+      <p><span class="val">${findVal(f)}</span>（推定）　${f.where}　信頼度：${f.conf}</p>
+      <p>${f.relText}</p><p>対応案：${f.rec}</p>
+      <div class="actions">
+        <button class="btn" data-act="cand" ${added ? 'disabled' : ''}>${added ? '変状候補に追加済み' : '変状候補に追加'}</button>
+        <button class="btn" data-act="3d">3Dで見る</button>
+        ${f.flight ? `<button class="btn" data-act="fly">再測量の飛行を見る</button>` : ''}
+      </div></li>`;
+  }).join('');
+  $$('#finds .find').forEach(li => {
+    const f = FINDINGS.find(x => x.id === li.dataset.id);
+    const pick = () => { anal.sel = f.id; anal.view = f.view; renderAnal(); };
+    li.addEventListener('click', e => { if (!e.target.closest('button')) pick(); });
+    li.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target === li) { e.preventDefault(); pick(); } });
+    li.querySelectorAll('button').forEach(b => b.addEventListener('click', () => findAction(f, b.dataset.act)));
+  });
+}
+
+function findAction(f, act) {
+  if (act === 'cand') {
+    const c = { id: 'cf-' + f.id, km: Math.round((f.from + f.to) / 10) * 5, struct: f.cand.struct, part: f.cand.part, defect: f.cand.defect, ai: f.cand.ai, conf: f.conf,
+      status: 'open', media: '写真測量（点群の比較）', change: '新規', kind: f.cand.kind, pos: f.cand.pos, fromFinding: f.id,
+      note: `点群の時系列比較で${findVal(f)}の変化を推定しました。値は参考値です。${f.rec}を推奨します。` };
+    C.push(c);
+    toast(`「${f.title}」を変状候補に追加しました`);
+    renderSide(); renderStrip(); three.refresh && three.refresh(); renderFinds();
+  } else if (act === '3d') {
+    const c = C.find(x => x.fromFinding === f.id);
+    showView('inspect');
+    if (c) select(c.id, true); else if (three.focusKm) three.focusKm((f.from + f.to) / 2);
+  } else if (act === 'fly') {
+    sched.sel = f.flight; showView('sched');
+  }
+}
+$$('#anal-view button').forEach(b => b.addEventListener('click', () => { anal.view = b.dataset.v; renderAnal(); }));
+$$('#anal-epoch button').forEach(b => b.addEventListener('click', () => { anal.epoch = b.dataset.e; renderAnal(); }));
+new ResizeObserver(() => {
+  if (!$('#view-anal').classList.contains('is-active')) return;
+  const w = Math.round($('#anal-body').clientWidth);
+  if (w && Math.abs(w - analW) > 4) renderAnal();
+}).observe($('#view-anal .anal-main'));
+const rerenderActive = () => { if ($('#view-anal').classList.contains('is-active')) renderAnal(); };
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', rerenderActive);
+new MutationObserver(rerenderActive).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+/* ---------- boot ---------- */
+renderSide();
+renderStrip();
+init3D();
+new ResizeObserver(() => renderStrip()).observe($('.strip-panel'));
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(renderStrip);
+})();
+</script>
+</body>
+</html>

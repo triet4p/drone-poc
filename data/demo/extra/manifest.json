@@ -1,0 +1,674 @@
+{
+  "model": "IDEA-Research/grounding-dino-tiny",
+  "classes": [
+    "crack",
+    "spalling",
+    "rust",
+    "water leakage",
+    "exposed rebar"
+  ],
+  "threshold": 0.18,
+  "note": "zero-shot, not trained; scores uncalibrated",
+  "images": [
+    {
+      "id": "efflorescence",
+      "file": "efflorescence.jpg",
+      "preview": "efflorescence_detected.jpg",
+      "width": 1920,
+      "height": 1440,
+      "km_m": 14205.0,
+      "structure": "T-07 トンネル",
+      "member": "起点方坑口 覆工",
+      "structure_id": "T07",
+      "member_id": "T07-P1",
+      "license": "cc-by",
+      "attribution": "Achim Hering / CC BY 3.0",
+      "detections": [
+        {
+          "label": "water leakage",
+          "score": 0.4546,
+          "box_px": [
+            128.1,
+            657.1,
+            1914.0,
+            1435.4
+          ],
+          "box_norm": [
+            0.06672,
+            0.45632,
+            0.99687,
+            0.99681
+          ]
+        },
+        {
+          "label": "crack",
+          "score": 0.3584,
+          "box_px": [
+            278.7,
+            3.1,
+            1488.6,
+            688.2
+          ],
+          "box_norm": [
+            0.14516,
+            0.00215,
+            0.77531,
+            0.47792
+          ]
+        },
+        {
+          "label": "crack",
+          "score": 0.2116,
+          "box_px": [
+            180.8,
+            1265.3,
+            683.9,
+            1304.6
+          ],
+          "box_norm": [
+            0.09417,
+            0.87868,
+            0.3562,
+            0.90597
+          ]
+        },
+        {
+          "label": "rust",
+          "score": 0.1999,
+          "box_px": [
+            586.9,
+            494.3,
+            1128.1,
+            671.0
+          ],
+          "box_norm": [
+            0.30568,
+            0.34326,
+            0.58755,
+            0.46597
+          ]
+        },
+        {
+          "label": "water leakage",
+          "score": 0.1987,
+          "box_px": [
+            1280.0,
+            692.4,
+            1916.8,
+            1435.3
+          ],
+          "box_norm": [
+            0.66667,
+            0.48083,
+            0.99833,
+            0.99674
+          ]
+        }
+      ]
+    },
+    {
+      "id": "exposed_rebar",
+      "file": "exposed_rebar.jpg",
+      "preview": "exposed_rebar_detected.jpg",
+      "width": 1920,
+      "height": 2880,
+      "km_m": 13168.0,
+      "structure": "B-14 橋梁",
+      "member": "A1 橋台",
+      "structure_id": "B14",
+      "member_id": "B14-A1",
+      "license": "cc-by",
+      "attribution": "OregonDOT / CC BY 2.0",
+      "detections": [
+        {
+          "label": "rust",
+          "score": 0.5652,
+          "box_px": [
+            921.1,
+            482.9,
+            1084.0,
+            2244.6
+          ],
+          "box_norm": [
+            0.47974,
+            0.16767,
+            0.56458,
+            0.77937
+          ]
+        },
+        {
+          "label": "exposed rebar",
+          "score": 0.5124,
+          "box_px": [
+            895.3,
+            363.6,
+            1233.2,
+            2251.4
+          ],
+          "box_norm": [
+            0.4663,
+            0.12625,
+            0.64229,
+            0.78174
+          ]
+        },
+        {
+          "label": "water leakage",
+          "score": 0.3327,
+          "box_px": [
+            1182.9,
+            12.9,
+            1522.5,
+            2869.6
+          ],
+          "box_norm": [
+            0.61609,
+            0.00448,
+            0.79297,
+            0.99639
+          ]
+        },
+        {
+          "label": "crack",
+          "score": 0.3282,
+          "box_px": [
+            532.6,
+            0.7,
+            804.5,
+            1886.1
+          ],
+          "box_norm": [
+            0.2774,
+            0.00024,
+            0.41901,
+            0.6549
+          ]
+        },
+        {
+          "label": "water leakage",
+          "score": 0.2942,
+          "box_px": [
+            356.0,
+            8.7,
+            1521.7,
+            2870.9
+          ],
+          "box_norm": [
+            0.18542,
+            0.00302,
+            0.79255,
+            0.99684
+          ]
+        },
+        {
+          "label": "crack",
+          "score": 0.2608,
+          "box_px": [
+            508.5,
+            2.9,
+            898.6,
+            2868.6
+          ],
+          "box_norm": [
+            0.26484,
+            0.00101,
+            0.46802,
+            0.99604
+          ]
+        }
+      ]
+    },
+    {
+      "id": "landslide",
+      "file": "landslide.jpg",
+      "preview": "landslide_detected.jpg",
+      "width": 1920,
+      "height": 1440,
+      "km_m": 12880.0,
+      "structure": "盛土",
+      "member": "",
+      "structure_id": "S1",
+      "member_id": "",
+      "license": "cc0",
+      "attribution": "CaseGrillot / CC0",
+      "detections": [
+        {
+          "label": "water leakage",
+          "score": 0.4987,
+          "box_px": [
+            4.5,
+            750.7,
+            1863.3,
+            1436.1
+          ],
+          "box_norm": [
+            0.00234,
+            0.52132,
+            0.97047,
+            0.99729
+          ]
+        },
+        {
+          "label": "exposed rebar",
+          "score": 0.3826,
+          "box_px": [
+            1343.2,
+            637.9,
+            1916.8,
+            844.7
+          ],
+          "box_norm": [
+            0.69958,
+            0.44299,
+            0.99833,
+            0.5866
+          ]
+        },
+        {
+          "label": "crack",
+          "score": 0.2983,
+          "box_px": [
+            446.2,
+            930.8,
+            739.5,
+            1197.1
+          ],
+          "box_norm": [
+            0.2324,
+            0.64639,
+            0.38516,
+            0.83132
+          ]
+        },
+        {
+          "label": "crack",
+          "score": 0.2737,
+          "box_px": [
+            617.4,
+            1284.1,
+            735.6,
+            1434.1
+          ],
+          "box_norm": [
+            0.32156,
+            0.89174,
+            0.38312,
+            0.9959
+          ]
+        },
+        {
+          "label": "water leakage",
+          "score": 0.2462,
+          "box_px": [
+            888.0,
+            760.1,
+            1311.5,
+            841.1
+          ],
+          "box_norm": [
+            0.4625,
+            0.52785,
+            0.68307,
+            0.5841
+          ]
+        },
+        {
+          "label": "rust",
+          "score": 0.1999,
+          "box_px": [
+            1321.7,
+            648.4,
+            1917.7,
+            1434.3
+          ],
+          "box_norm": [
+            0.68839,
+            0.45028,
+            0.9988,
+            0.99604
+          ]
+        }
+      ]
+    },
+    {
+      "id": "spalling_girder",
+      "file": "spalling_girder.jpg",
+      "preview": "spalling_girder_detected.jpg",
+      "width": 1600,
+      "height": 1200,
+      "km_m": 13480.0,
+      "structure": "B-14 橋梁",
+      "member": "G5 主桁",
+      "structure_id": "B14",
+      "member_id": "B14-G5",
+      "license": "pd",
+      "attribution": "Yellowstone National Park / Public domain",
+      "detections": [
+        {
+          "label": "exposed rebar",
+          "score": 0.5147,
+          "box_px": [
+            2.4,
+            0.8,
+            1581.8,
+            853.7
+          ],
+          "box_norm": [
+            0.0015,
+            0.00067,
+            0.98862,
+            0.71142
+          ]
+        },
+        {
+          "label": "water leakage",
+          "score": 0.4425,
+          "box_px": [
+            432.1,
+            318.5,
+            1596.3,
+            944.8
+          ],
+          "box_norm": [
+            0.27006,
+            0.26542,
+            0.99769,
+            0.78733
+          ]
+        },
+        {
+          "label": "crack",
+          "score": 0.2937,
+          "box_px": [
+            1181.9,
+            262.8,
+            1264.0,
+            458.0
+          ],
+          "box_norm": [
+            0.73869,
+            0.219,
+            0.79,
+            0.38167
+          ]
+        },
+        {
+          "label": "rust",
+          "score": 0.2853,
+          "box_px": [
+            420.5,
+            179.8,
+            1241.1,
+            700.0
+          ],
+          "box_norm": [
+            0.26281,
+            0.14983,
+            0.77569,
+            0.58333
+          ]
+        },
+        {
+          "label": "crack",
+          "score": 0.2274,
+          "box_px": [
+            188.6,
+            761.3,
+            405.5,
+            984.7
+          ],
+          "box_norm": [
+            0.11787,
+            0.63442,
+            0.25344,
+            0.82058
+          ]
+        },
+        {
+          "label": "crack",
+          "score": 0.2207,
+          "box_px": [
+            1242.3,
+            208.5,
+            1592.8,
+            421.1
+          ],
+          "box_norm": [
+            0.77644,
+            0.17375,
+            0.9955,
+            0.35092
+          ]
+        }
+      ]
+    },
+    {
+      "id": "spalling_pier",
+      "file": "spalling_pier.jpg",
+      "preview": "spalling_pier_detected.jpg",
+      "width": 1920,
+      "height": 2877,
+      "km_m": 13262.0,
+      "structure": "B-14 橋梁",
+      "member": "P3 橋脚",
+      "structure_id": "B14",
+      "member_id": "B14-P3",
+      "license": "cc-by",
+      "attribution": "OregonDOT / CC BY 2.0",
+      "detections": [
+        {
+          "label": "rust",
+          "score": 0.3939,
+          "box_px": [
+            766.2,
+            1554.2,
+            863.1,
+            1887.4
+          ],
+          "box_norm": [
+            0.39906,
+            0.54022,
+            0.44953,
+            0.65603
+          ]
+        },
+        {
+          "label": "rust",
+          "score": 0.3548,
+          "box_px": [
+            593.3,
+            335.0,
+            748.4,
+            798.1
+          ],
+          "box_norm": [
+            0.30901,
+            0.11644,
+            0.38979,
+            0.27741
+          ]
+        },
+        {
+          "label": "water leakage",
+          "score": 0.3339,
+          "box_px": [
+            481.5,
+            336.2,
+            837.2,
+            2870.4
+          ],
+          "box_norm": [
+            0.25078,
+            0.11686,
+            0.43604,
+            0.99771
+          ]
+        },
+        {
+          "label": "crack",
+          "score": 0.3222,
+          "box_px": [
+            911.8,
+            661.5,
+            1251.0,
+            2607.2
+          ],
+          "box_norm": [
+            0.4749,
+            0.22993,
+            0.65156,
+            0.90622
+          ]
+        },
+        {
+          "label": "rust",
+          "score": 0.2789,
+          "box_px": [
+            637.7,
+            337.7,
+            712.9,
+            755.5
+          ],
+          "box_norm": [
+            0.33214,
+            0.11738,
+            0.3713,
+            0.2626
+          ]
+        },
+        {
+          "label": "crack",
+          "score": 0.2693,
+          "box_px": [
+            1144.1,
+            670.8,
+            1248.0,
+            1113.9
+          ],
+          "box_norm": [
+            0.59589,
+            0.23316,
+            0.65,
+            0.38717
+          ]
+        }
+      ]
+    },
+    {
+      "id": "tunnel_portal",
+      "file": "tunnel_portal.jpg",
+      "preview": "tunnel_portal_detected.jpg",
+      "width": 1920,
+      "height": 1276,
+      "km_m": 14975.0,
+      "structure": "T-07 トンネル",
+      "member": "終点方坑口 覆工",
+      "structure_id": "T07",
+      "member_id": "T07-P2",
+      "license": "cc-by",
+      "attribution": "Vyacheslav Argenberg / CC BY 4.0",
+      "detections": [
+        {
+          "label": "exposed rebar",
+          "score": 0.6074,
+          "box_px": [
+            953.5,
+            760.5,
+            1782.6,
+            1271.7
+          ],
+          "box_norm": [
+            0.49661,
+            0.596,
+            0.92844,
+            0.99663
+          ]
+        },
+        {
+          "label": "water leakage",
+          "score": 0.3954,
+          "box_px": [
+            661.6,
+            264.0,
+            804.3,
+            876.6
+          ],
+          "box_norm": [
+            0.34458,
+            0.2069,
+            0.41891,
+            0.68699
+          ]
+        },
+        {
+          "label": "rust",
+          "score": 0.355,
+          "box_px": [
+            24.4,
+            770.2,
+            1909.2,
+            1272.9
+          ],
+          "box_norm": [
+            0.01271,
+            0.60361,
+            0.99438,
+            0.99757
+          ]
+        },
+        {
+          "label": "crack",
+          "score": 0.2973,
+          "box_px": [
+            937.1,
+            769.3,
+            1103.8,
+            1266.7
+          ],
+          "box_norm": [
+            0.48807,
+            0.6029,
+            0.5749,
+            0.99271
+          ]
+        },
+        {
+          "label": "rust",
+          "score": 0.265,
+          "box_px": [
+            48.1,
+            895.2,
+            972.9,
+            1273.6
+          ],
+          "box_norm": [
+            0.02505,
+            0.70157,
+            0.50672,
+            0.99812
+          ]
+        },
+        {
+          "label": "water leakage",
+          "score": 0.2439,
+          "box_px": [
+            886.3,
+            584.5,
+            921.5,
+            797.6
+          ],
+          "box_norm": [
+            0.46161,
+            0.45807,
+            0.47995,
+            0.62508
+          ]
+        }
+      ]
+    }
+  ],
+  "latency_s": {
+    "mean_per_pass": 20.37,
+    "max": 42.04
+  }
+}

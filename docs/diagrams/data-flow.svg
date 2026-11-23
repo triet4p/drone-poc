@@ -1,0 +1,113 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 560" width="1080" height="560" role="img" aria-labelledby="t d">
+  <title id="t">Inspection data flow</title>
+  <desc id="d">One write path from upload to report; demo surfaces are read-only and cannot produce report rows.</desc>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#1B1B1B"/></marker>
+    <marker id="g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#7A8792"/></marker>
+    <marker id="r" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#A63A4A"/></marker>
+  </defs>
+  <rect width="1080" height="560" fill="#FBFBF8"/>
+  <text x="40" y="38" font-family="Georgia, 'Times New Roman', serif" font-size="21" font-weight="700" fill="#1B1B1B">Inspection Data Flow — One Write Path</text>
+  <text x="40" y="60" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="12" font-style="italic" fill="#5F6B75">Only the upper lane can produce reportable evidence. Demo tabs and context layers are read-only.</text>
+
+  <!-- Stage boxes -->
+  <g font-family="-apple-system, 'Segoe UI', sans-serif">
+    <rect x="40" y="96" width="136" height="56" rx="6" fill="#EAF2FA" stroke="#24425F"/>
+    <text x="52" y="118" font-size="13" font-weight="700" fill="#1B1B1B">1. Upload</text>
+    <text x="52" y="136" font-size="10.5" fill="#5F6B75">multipart + sha256</text>
+
+    <rect x="212" y="96" width="136" height="56" rx="6" fill="#EAF2FA" stroke="#24425F"/>
+    <text x="224" y="118" font-size="13" font-weight="700" fill="#1B1B1B">2. Normalize</text>
+    <text x="224" y="136" font-size="10.5" fill="#5F6B75">EXIF · preview · thumb</text>
+
+    <rect x="384" y="96" width="136" height="56" rx="6" fill="#EAF2FA" stroke="#24425F"/>
+    <text x="396" y="118" font-size="13" font-weight="700" fill="#1B1B1B">3. Infer</text>
+    <text x="396" y="136" font-size="10.5" fill="#5F6B75">job · 5 classes · CPU</text>
+
+    <rect x="556" y="96" width="136" height="56" rx="6" fill="#EAF2FA" stroke="#24425F"/>
+    <text x="568" y="118" font-size="13" font-weight="700" fill="#1B1B1B">4. Review</text>
+    <text x="568" y="136" font-size="10.5" fill="#5F6B75">overlay · evidence</text>
+
+    <rect x="728" y="96" width="136" height="56" rx="6" fill="#E8F3EA" stroke="#2F6240"/>
+    <text x="740" y="118" font-size="13" font-weight="700" fill="#1B1B1B">5. Judge</text>
+    <text x="740" y="136" font-size="10.5" fill="#5F6B75">AA…S · append-only</text>
+
+    <rect x="900" y="96" width="136" height="56" rx="6" fill="#EAF2FA" stroke="#24425F"/>
+    <text x="912" y="118" font-size="13" font-weight="700" fill="#1B1B1B">6. Report</text>
+    <text x="912" y="136" font-size="10.5" fill="#5F6B75">confirmed · DOCX</text>
+  </g>
+  <g stroke="#1B1B1B" stroke-width="1.6" marker-end="url(#a)">
+    <line x1="176" y1="124" x2="212" y2="124"/><line x1="348" y1="124" x2="384" y2="124"/>
+    <line x1="520" y1="124" x2="556" y2="124"/><line x1="692" y1="124" x2="728" y2="124"/>
+    <line x1="864" y1="124" x2="900" y2="124"/>
+  </g>
+
+  <!-- Artifacts -->
+  <g font-family="-apple-system, 'Segoe UI', sans-serif">
+    <line x1="108" y1="152" x2="108" y2="182" stroke="#7A8792" stroke-width="1.3" stroke-dasharray="4 3" marker-end="url(#g)"/>
+    <line x1="280" y1="152" x2="280" y2="182" stroke="#7A8792" stroke-width="1.3" stroke-dasharray="4 3" marker-end="url(#g)"/>
+    <line x1="452" y1="152" x2="452" y2="182" stroke="#7A8792" stroke-width="1.3" stroke-dasharray="4 3" marker-end="url(#g)"/>
+    <line x1="624" y1="152" x2="624" y2="182" stroke="#7A8792" stroke-width="1.3" stroke-dasharray="4 3" marker-end="url(#g)"/>
+    <line x1="796" y1="152" x2="796" y2="182" stroke="#7A8792" stroke-width="1.3" stroke-dasharray="4 3" marker-end="url(#g)"/>
+
+    <rect x="40" y="188" width="136" height="74" rx="5" fill="#FFFFFF" stroke="#C9D3DC"/>
+    <text x="52" y="208" font-size="11" font-weight="700" fill="#1B1B1B">original</text>
+    <text x="52" y="224" font-size="10" fill="#5F6B75">full / preview</text>
+    <text x="52" y="240" font-size="10" fill="#5F6B75">thumb</text>
+
+    <rect x="212" y="188" width="136" height="74" rx="5" fill="#FFFFFF" stroke="#C9D3DC"/>
+    <text x="224" y="208" font-size="11" font-weight="700" fill="#1B1B1B">image row</text>
+    <text x="224" y="224" font-size="10" fill="#5F6B75">km · member</text>
+    <text x="224" y="240" font-size="10" fill="#5F6B75">license</text>
+
+    <rect x="384" y="188" width="136" height="74" rx="5" fill="#FFFFFF" stroke="#C9D3DC"/>
+    <text x="396" y="208" font-size="11" font-weight="700" fill="#1B1B1B">job</text>
+    <text x="396" y="224" font-size="10" fill="#5F6B75">progress · error</text>
+    <text x="396" y="240" font-size="10" fill="#5F6B75">passes</text>
+
+    <rect x="556" y="188" width="136" height="74" rx="5" fill="#FFFFFF" stroke="#C9D3DC"/>
+    <text x="568" y="208" font-size="11" font-weight="700" fill="#1B1B1B">detection</text>
+    <text x="568" y="224" font-size="10" fill="#5F6B75">label · score</text>
+    <text x="568" y="240" font-size="10" fill="#5F6B75">box · model</text>
+
+    <rect x="728" y="188" width="136" height="74" rx="5" fill="#E8F3EA" stroke="#2F6240"/>
+    <text x="740" y="208" font-size="11" font-weight="700" fill="#1B1B1B">judgement</text>
+    <text x="740" y="224" font-size="10" fill="#5F6B75">rank · comment</text>
+    <text x="740" y="240" font-size="10" fill="#5F6B75">actor · timestamp</text>
+
+    <rect x="900" y="188" width="136" height="74" rx="5" fill="#FFFFFF" stroke="#C9D3DC"/>
+    <text x="912" y="208" font-size="11" font-weight="700" fill="#1B1B1B">調書 DOCX</text>
+    <text x="912" y="224" font-size="10" fill="#5F6B75">latest judgement</text>
+    <text x="912" y="240" font-size="10" fill="#5F6B75">license gate</text>
+  </g>
+
+  <!-- Storage band -->
+  <rect x="40" y="292" width="996" height="72" rx="7" fill="#F4F7FA" stroke="#D5DEE7"/>
+  <text x="54" y="314" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="11" font-weight="700" fill="#5F6B75">PERSISTENCE</text>
+  <text x="54" y="334" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="12" fill="#1B1B1B">SQLite (demo) → PostgreSQL 18 + PostGIS (MVP) · filesystem with adapter · append-only judgement/audit</text>
+  <text x="54" y="352" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="10.5" fill="#5F6B75">every inference stores model hash, threshold, preprocessing, and source media id</text>
+
+  <!-- Read-only surfaces -->
+  <rect x="40" y="392" width="470" height="112" rx="7" fill="#F6F0E4" stroke="#6B5A3E"/>
+  <text x="54" y="414" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="11" font-weight="700" fill="#6B5A3E">READ-ONLY CONTEXT</text>
+  <text x="54" y="436" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="12" font-weight="700" fill="#1B1B1B">GSI imagery · OSM corridor · real-line photos</text>
+  <text x="54" y="454" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="10.5" fill="#5F6B75">display and orientation only</text>
+  <text x="54" y="472" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="10.5" fill="#5F6B75">no findings, no measurements in report</text>
+
+  <rect x="566" y="392" width="470" height="112" rx="7" fill="#FFFFFF" stroke="#A63A4A" stroke-dasharray="5 4"/>
+  <text x="580" y="414" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="11" font-weight="700" fill="#A63A4A">DEMO SURFACES</text>
+  <text x="580" y="436" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="12" font-weight="700" fill="#1B1B1B">flight schedule · shooting plan · displacement</text>
+  <text x="580" y="454" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="10.5" fill="#5F6B75">fixed demo data, clearly badged DEMO</text>
+  <text x="580" y="472" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="10.5" fill="#5F6B75">cannot create judgement or report rows</text>
+
+  <!-- Blocked edge -->
+  <line x1="1035" y1="392" x2="968" y2="262" stroke="#A63A4A" stroke-width="1.4" stroke-dasharray="5 4" marker-end="url(#r)"/>
+  <text x="900" y="386" font-family="-apple-system, 'Segoe UI', sans-serif" font-size="10.5" fill="#A63A4A">blocked</text>
+
+  <!-- Legend -->
+  <g font-family="-apple-system, 'Segoe UI', sans-serif" font-size="10.5" fill="#5F6B75">
+    <line x1="40" y1="534" x2="70" y2="534" stroke="#1B1B1B" stroke-width="1.6" marker-end="url(#a)"/><text x="76" y="538">write path</text>
+    <line x1="160" y1="534" x2="190" y2="534" stroke="#7A8792" stroke-width="1.3" stroke-dasharray="4 3" marker-end="url(#g)"/><text x="196" y="538">artifact</text>
+    <line x1="272" y1="534" x2="302" y2="534" stroke="#A63A4A" stroke-width="1.4" stroke-dasharray="5 4" marker-end="url(#r)"/><text x="308" y="538">forbidden / blocked</text>
+  </g>
+</svg>
