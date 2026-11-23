@@ -10,6 +10,8 @@ from .commons import acquire
 from .colmap import export_package, run_colmap
 from .video import acquire_video
 from .mapillary import acquire_mapillary
+from .mapillary_sfm import build_cluster_package, fetch_cluster, load_token
+from .merge import merge_manifests
 
 
 def cmd_acquire(args) -> None:
@@ -60,6 +62,26 @@ def cmd_acquire_mapillary(args) -> None:
         cached_dir=Path(args.cached_dir) if args.cached_dir else None,
     )
     print(json.dumps(manifest.get("counts"), ensure_ascii=False))
+
+
+def cmd_merge(args) -> None:
+    manifest = merge_manifests(
+        site_id=args.site_id, site_name=args.site_name or args.site_id,
+        work=Path(args.work), inputs=[Path(x) for x in args.inputs],
+    )
+    print(json.dumps(manifest.get("counts"), ensure_ascii=False))
+    print("providers:", manifest.get("providers"))
+
+
+def cmd_sfm_cluster(args) -> None:
+    token = load_token(Path(args.env_file))
+    cache = Path(args.cache) if args.cache else Path(args.work) / "sfm_cluster.zlib"
+    cluster = fetch_cluster(args.image_id, token, cache)
+    result = build_cluster_package(
+        cluster=cluster, manifest_path=Path(args.manifest), work=Path(args.work), out=Path(args.out),
+        site_id=args.site_id, site_name=args.site_name,
+    )
+    print(json.dumps(result["qa"], ensure_ascii=False, indent=2))
 
 
 def cmd_reconstruct(args) -> None:
@@ -142,6 +164,24 @@ def main(argv: list[str] | None = None) -> int:
     m.add_argument("--env-file", default=".env")
     m.add_argument("--cached-dir", default=None)
     m.set_defaults(func=cmd_acquire_mapillary)
+
+    mg = sub.add_parser("merge")
+    mg.add_argument("--site-id", required=True)
+    mg.add_argument("--site-name", default="")
+    mg.add_argument("--work", required=True)
+    mg.add_argument("--inputs", nargs="+", required=True)
+    mg.set_defaults(func=cmd_merge)
+
+    sfm = sub.add_parser("sfm-cluster")
+    sfm.add_argument("--image-id", required=True)
+    sfm.add_argument("--manifest", required=True)
+    sfm.add_argument("--work", required=True)
+    sfm.add_argument("--out", required=True)
+    sfm.add_argument("--site-id", required=True)
+    sfm.add_argument("--site-name", default="")
+    sfm.add_argument("--env-file", default=".env")
+    sfm.add_argument("--cache", default="")
+    sfm.set_defaults(func=cmd_sfm_cluster)
 
     r = sub.add_parser("reconstruct")
     r.add_argument("--site-id", required=True)
