@@ -95,3 +95,19 @@ If COLMAP produces a degenerate or empty model on another site:
 - Conclusion: Mapillary is a viable **discovery/coverage** provider where sequences exist,
   and a viable VGGT input; for this site, COLMAP on the continuous video is the better
   geometry package.
+
+## 7. VGG-T³ latest-model trial
+
+- Model: NVIDIA **VGG-T³** (`nvidia/vgg-ttt`), code `nv-dvl/vgg-ttt`, CVPR 2026.
+- Input: 16 evenly spaced Koma frames (518 px, padded), memory-efficient inference.
+- Runtime: model load + inference completed; **31,442 points**, 16 source frames,
+  one source pixel per point; package `data/pointcloud/koma_vggt3/`,
+  `link_method=vggt3_pointmap`, `scale_status=relative`.
+- Result: technically runs on the 16 GB RTX 4060 Ti, but the pointmap collapses into a
+  very compact blob; it is not a usable inspection surface and not promoted to primary.
+- **Pi4 was not run yet.** The original VGGT-1B fallback was tested on Mapillary; VGG-T³
+  is the latest tested model.
+- Conclusion: newer feed-forward models alone do not fix the missing lateral viewpoints
+  in this cab-view sequence. The next geometry step needs dense multi-view data or
+  COLMAP dense/CUDA (the apt COLMAP is CPU-only and rejects dense stereo), not more
+  points from the same thin baseline.

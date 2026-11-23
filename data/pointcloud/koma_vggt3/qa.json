@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "gates": {
+    "points": true,
+    "frames": true
+  },
+  "stats": {
+    "registered_images": 16,
+    "points3d": 31442,
+    "observations": 31442,
+    "confidence_quantile": 0.6,
+    "source": "VGG-T³ depth pointmap (one source pixel per point)"
+  },
+  "note": "VGG-T³: no multi-view reprojection gate; click marker is the source pixel of the pointmap sample."
+}
