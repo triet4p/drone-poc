@@ -16,3 +16,4 @@ data/real/
 .env
 data/demo.db-*
 data/demo/extra_out/
+data/mapillary/
