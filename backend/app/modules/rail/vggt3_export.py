@@ -47,7 +47,7 @@ def main() -> None:
     model = VGGT.from_pretrained("nvidia/vgg-ttt").eval().cuda()
     images = load_and_preprocess_images([str(q) for q in paths], mode="pad", target_size=args.target_size).to(device)
     with torch.no_grad():
-        preds = model.infer(images)
+        preds = model.infer(images, memory_efficient_inference=True)
     points3d = preds["pts3d"].detach().float().cpu().numpy()
     conf = preds["conf"].detach().float().cpu().numpy()
     print("[vggt3] pts3d", points3d.shape, "conf", conf.shape)
