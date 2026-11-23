@@ -142,21 +142,30 @@ export default function PointCloudView({ lang }: { lang: Lang }) {
         pointsRef.current = points;
         scene.add(points);
         if (m.link_method && geo.boundingSphere) {
-          const sphere = geo.boundingSphere;
-          const radius = Math.max(sphere.radius, 1);
-          controls.target.copy(sphere.center);
-          camera.position.set(
-            sphere.center.x + radius * 0.75,
-            sphere.center.y - radius * 1.05,
-            sphere.center.z + radius * 0.6,
+          // Robust framing: Mapillary/learned clouds often have distant outliers.
+          const stride = Math.max(1, Math.floor(n / 6000));
+          const xs: number[] = [], ys: number[] = [], zs: number[] = [];
+          for (let i = 0; i < n; i += stride) {
+            xs.push(pos[i * 3]); ys.push(pos[i * 3 + 1]); zs.push(pos[i * 3 + 2]);
+          }
+          const q = (a: number[], f: number) => a[Math.min(a.length - 1, Math.max(0, Math.floor(a.length * f)))];
+          xs.sort((a, b) => a - b); ys.sort((a, b) => a - b); zs.sort((a, b) => a - b);
+          const center = new THREE.Vector3(q(xs, 0.5), q(ys, 0.5), q(zs, 0.5));
+          const radius = Math.max(
+            (q(xs, 0.98) - q(xs, 0.02)) / 2,
+            (q(ys, 0.98) - q(ys, 0.02)) / 2,
+            (q(zs, 0.98) - q(zs, 0.02)) / 2,
+            0.05,
           );
-          camera.near = Math.max(radius / 1000, 0.01);
-          camera.far = radius * 100;
+          controls.target.copy(center);
+          camera.position.set(center.x + radius * 1.0, center.y - radius * 1.8, center.z + radius * 0.9);
+          camera.near = Math.max(radius / 1000, 0.001);
+          camera.far = radius * 200;
           camera.updateProjectionMatrix();
           controls.update();
           cloudRadius = radius;
-          material.size = Math.max(radius * 0.009, 0.01);
-          raycaster.params.Points = { threshold: Math.max(radius * 0.02, 0.02) };
+          material.size = Math.max(radius * 0.004, 0.002);
+          raycaster.params.Points = { threshold: Math.max(radius * 0.012, 0.005) };
           grid.visible = false;
           axes.visible = false;
           homeRef.current = { pos: camera.position.clone(), target: controls.target.clone() };
