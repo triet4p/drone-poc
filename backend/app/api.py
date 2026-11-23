@@ -51,6 +51,14 @@ def pc_view(name: str):
     return FileResponse(p, headers={"Cache-Control": "public, max-age=3600"})
 
 
+@app.get("/api/pointcloud/dense.bin")
+def pc_dense():
+    path = pointcloud.PC / "dense.bin"
+    if not path.exists():
+        raise HTTPException(404, "dense cloud not found")
+    return FileResponse(path, media_type="application/octet-stream")
+
+
 @app.post("/api/pointcloud/pick")
 def pc_pick(q: PointPick):
     try:

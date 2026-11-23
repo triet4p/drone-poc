@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "gates": {
+    "points": true,
+    "views": true
+  },
+  "stats": {
+    "registered_images": 26,
+    "points3d": 6041,
+    "observations": 17920,
+    "cluster_points": 7322,
+    "shots": 46,
+    "matched_shots": 32
+  },
+  "note": "Projected Mapillary SfM cluster; no track residual gate."
+}

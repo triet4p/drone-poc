@@ -13,9 +13,11 @@ Status: `[~]` in progress. Owner: Main. Workflow: lightweight, one integration o
 
 ## Tasks
 - [x] Multi-source `merge` CLI.
+- [x] Mapillary `sfm_cluster` adapter and trial (cluster street-level; not promoted).
 - [x] Mapillary SfM cluster adapter (`sfm_cluster` zlib → package).
 - [x] VGG-T³ 16-frame fallback package.
 - [x] UI selected-point highlight, local coords, reset, layer toggles.
+- [x] Robust percentile camera framing; dense layer hooks.
 - [~] COLMAP CUDA build → dense Koma MVS.
 - [ ] Dense PLY → `dense.bin` visual layer + sparse clickable overlay.
 - [ ] Candidate lateral site (Tokyo/Odawara/other) with Mapillary + Commons.

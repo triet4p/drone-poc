@@ -11,6 +11,7 @@ from .colmap import export_package, run_colmap
 from .video import acquire_video
 from .mapillary import acquire_mapillary
 from .mapillary_sfm import build_cluster_package, fetch_cluster, load_token
+from .dense import convert
 from .merge import merge_manifests
 
 
@@ -82,6 +83,11 @@ def cmd_sfm_cluster(args) -> None:
         site_id=args.site_id, site_name=args.site_name,
     )
     print(json.dumps(result["qa"], ensure_ascii=False, indent=2))
+
+
+def cmd_dense(args) -> None:
+    n = convert(Path(args.ply), Path(args.out) / "dense.bin", args.max_points)
+    print(f"dense points: {n}")
 
 
 def cmd_reconstruct(args) -> None:
@@ -182,6 +188,12 @@ def main(argv: list[str] | None = None) -> int:
     sfm.add_argument("--env-file", default=".env")
     sfm.add_argument("--cache", default="")
     sfm.set_defaults(func=cmd_sfm_cluster)
+
+    d = sub.add_parser("dense")
+    d.add_argument("--ply", required=True)
+    d.add_argument("--out", required=True)
+    d.add_argument("--max-points", type=int, default=600000)
+    d.set_defaults(func=cmd_dense)
 
     r = sub.add_parser("reconstruct")
     r.add_argument("--site-id", required=True)

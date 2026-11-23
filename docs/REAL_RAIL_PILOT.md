@@ -111,3 +111,19 @@ If COLMAP produces a degenerate or empty model on another site:
   in this cab-view sequence. The next geometry step needs dense multi-view data or
   COLMAP dense/CUDA (the apt COLMAP is CPU-only and rejects dense stereo), not more
   points from the same thin baseline.
+
+## 8. Multi-source + Mapillary SfM cluster (reusable path)
+
+- `merge` CLI: one site can combine video frames, Mapillary, Commons, uploads; duplicates
+  removed by sha256; each photo keeps provider/provenance. Koma merge
+  (16 video + 16 Mapillary) = 32 photos; COLMAP mapper failed on this mixed set.
+- Mapillary `sfm_cluster` (Graph API field) works:
+  - example image `111709760985702` returned cluster `517747626077625`;
+  - zlib payload: 1 camera, 46 shots, 7,322 points, reference LLA;
+  - built `koma_sfm`: 6,041 points, 26 matched photos, 17,920 projected observations,
+    project `mapillary_sfm_projected`, scale `relative`, no track residual gate;
+  - **caveat**: the sampled cluster is street-level (the clicked point opens a road /
+    houses photo), not a rail inspection surface. It is a working API/adapter result,
+    not promoted to the rail demo.
+- This proves the service works and is reusable; site/cluster selection needs a cluster
+  whose shots actually observe the rail structure.

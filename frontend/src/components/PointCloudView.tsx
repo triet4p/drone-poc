@@ -10,7 +10,7 @@ type Pick = {
   metrics?: { rail_offset_m: number; height_vs_rail_m: number; scale_status: string };
   views: View[];
 };
-type Meta = { id?: string; site_id?: string; site_name?: string; label?: string; count: number; points_url: string; note?: string; scale?: { status: string; basis: string }; scale_status?: string; link_method?: string; views: View[] };
+type Meta = { id?: string; site_id?: string; site_name?: string; label?: string; count: number; points_url: string; dense_url?: string; dense_count?: number; note?: string; scale?: { status: string; basis: string }; scale_status?: string; link_method?: string; views: View[] };
 
 export default function PointCloudView({ lang }: { lang: Lang }) {
   const host = useRef<HTMLDivElement>(null);
@@ -28,6 +28,8 @@ export default function PointCloudView({ lang }: { lang: Lang }) {
   const [showCloud, setShowCloud] = useState(true);
   const [showGrid, setShowGrid] = useState(false);
   const [showPhoto, setShowPhoto] = useState(true);
+  const [showDense, setShowDense] = useState(true);
+  const denseRef = useRef<THREE.Points | null>(null);
 
   useEffect(() => {
     let disposed = false;
@@ -141,6 +143,25 @@ export default function PointCloudView({ lang }: { lang: Lang }) {
         points = new THREE.Points(geo, material);
         pointsRef.current = points;
         scene.add(points);
+        if (m.dense_url) {
+          const dbuf = await (await fetch(m.dense_url)).arrayBuffer();
+          const df = new Float32Array(dbuf);
+          const dn = Math.floor(df.length / 7);
+          const dpos = new Float32Array(dn * 3);
+          const dcol = new Float32Array(dn * 3);
+          for (let i = 0, j = 0, k = 0; i < dn; i++, j += 7, k += 3) {
+            dpos[k] = df[j]; dpos[k + 1] = df[j + 1]; dpos[k + 2] = df[j + 2];
+            dcol[k] = df[j + 3] / 255; dcol[k + 1] = df[j + 4] / 255; dcol[k + 2] = df[j + 5] / 255;
+          }
+          const dgeo = new THREE.BufferGeometry();
+          dgeo.setAttribute("position", new THREE.BufferAttribute(dpos, 3));
+          dgeo.setAttribute("color", new THREE.BufferAttribute(dcol, 3));
+          dgeo.computeBoundingSphere();
+          const dmat = new THREE.PointsMaterial({ size: Math.max(0.002, (dgeo.boundingSphere?.radius || 1) * 0.0012), vertexColors: true, sizeAttenuation: true, transparent: true, opacity: 0.55 });
+          denseRef.current = new THREE.Points(dgeo, dmat);
+          denseRef.current.visible = showDense;
+          scene.add(denseRef.current);
+        }
         if (m.link_method && geo.boundingSphere) {
           // Robust framing: Mapillary/learned clouds often have distant outliers.
           const stride = Math.max(1, Math.floor(n / 6000));
@@ -196,6 +217,7 @@ export default function PointCloudView({ lang }: { lang: Lang }) {
       controls.dispose();
       if (points) { points.geometry.dispose(); (points.material as THREE.Material).dispose(); }
       if (selectedMarker) { selectedMarker.geometry.dispose(); (selectedMarker.material as THREE.Material).dispose(); }
+      if (denseRef.current) { denseRef.current.geometry.dispose(); (denseRef.current.material as THREE.Material).dispose(); }
       renderer.dispose();
       renderer.domElement.remove();
     };
@@ -219,6 +241,10 @@ export default function PointCloudView({ lang }: { lang: Lang }) {
           if (axesRef.current) axesRef.current.visible = next;
         }}>{t(lang, "pcGrid")}</button>
         <button className="chip" aria-pressed={showPhoto} onClick={() => setShowPhoto(!showPhoto)}>{t(lang, "pcPhoto")}</button>
+        {meta?.dense_url ? <button className="chip" aria-pressed={showDense} onClick={() => {
+          const next = !showDense; setShowDense(next);
+          if (denseRef.current) denseRef.current.visible = next;
+        }}>{t(lang, "pcDense")}</button> : null}
       </div>
       {loading && <div className="pc-loading">{t(lang, "loading")}</div>}
       {error && <div className="pc-error">{error}</div>}

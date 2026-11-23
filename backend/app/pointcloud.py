@@ -32,7 +32,12 @@ def _load():
 
 def meta():
     m, _, _ = _load()
-    return {**m, "points_url": "/api/pointcloud/points.bin", "package_dir": PC.name}
+    out = {**m, "points_url": "/api/pointcloud/points.bin", "package_dir": PC.name}
+    dense = PC / "dense.bin"
+    if dense.exists():
+        out["dense_url"] = "/api/pointcloud/dense.bin"
+        out["dense_count"] = dense.stat().st_size // (7 * 4)
+    return out
 
 
 def view_file(name: str) -> Path | None:
