@@ -103,8 +103,8 @@ export default function MapView({
       container: box.current,
       style: style(true),
       center: koma ? [139.33398, 35.908963] : kmToLngLat(13450),
-      zoom: koma ? 14.4 : 13.9,
-      pitch: koma ? 45 : 58,
+      zoom: koma ? 16.2 : 13.9,
+      pitch: koma ? 52 : 58,
       bearing: koma ? 0 : -12,
       attributionControl: false,
       maxPitch: 80,
@@ -119,6 +119,37 @@ export default function MapView({
     const addLayers = () => {
       if (map.getSource("track") || map.getSource("koma-site")) return;
       if (koma) {
+        try {
+          map.addSource("ofm", { type: "vector", url: "https://tiles.openfreemap.org/planet" });
+          map.addLayer({
+            id: "koma-buildings", type: "fill-extrusion", source: "ofm", "source-layer": "building", minzoom: 12,
+            paint: {
+              "fill-extrusion-color": ["interpolate", ["linear"], ["coalesce", ["get", "render_height"], 6],
+                0, "#e4d8c4", 8, "#cdbfa8", 20, "#a99880"],
+              "fill-extrusion-height": ["max", 8, ["coalesce", ["get", "render_height"], 6]],
+              "fill-extrusion-opacity": 0.95,
+            },
+          });
+          map.addLayer({
+            id: "koma-building-edges", type: "line", source: "ofm", "source-layer": "building", minzoom: 12,
+            paint: { "line-color": "#8a7a64", "line-width": 0.8, "line-opacity": 0.85 },
+          });
+          map.addLayer({
+            id: "koma-roads", type: "line", source: "ofm", "source-layer": "transportation", minzoom: 12,
+            paint: {
+              "line-color": ["match", ["get", "class"],
+                "motorway", "#c96725", "trunk", "#cf8d24", "primary", "#d7b35a",
+                "secondary", "#efe8d8", "tertiary", "#fffdf5", "street", "#ffffff", "#c7d1d8"],
+              "line-width": ["interpolate", ["linear"], ["zoom"], 12, 1.0, 16, 3.0, 18, 5],
+              "line-opacity": 0.98,
+            },
+          });
+          map.addLayer({
+            id: "koma-rail", type: "line", source: "ofm", "source-layer": "transportation", minzoom: 12,
+            filter: ["==", ["get", "class"], "rail"],
+            paint: { "line-color": "#222a30", "line-width": ["interpolate", ["linear"], ["zoom"], 12, 1, 17, 3], "line-dasharray": [3, 2] },
+          });
+        } catch { /* optional context */ }
         map.addSource("koma-site", {
           type: "geojson",
           data: { type: "Feature", properties: {}, geometry: { type: "Point", coordinates: [139.33398, 35.908963] } },

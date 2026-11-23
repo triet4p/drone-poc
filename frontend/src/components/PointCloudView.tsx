@@ -33,6 +33,8 @@ type Site = { site: string; name: string; kind: string; available: boolean };
 
 export default function PointCloudView({ lang, siteId }: { lang: Lang; siteId: string | null }) {
   const host = useRef<HTMLDivElement>(null);
+  const [cloudSite, setCloudSite] = useState(siteId ?? "koma_bridge");
+  useEffect(() => { if (siteId) setCloudSite(siteId); }, [siteId]);
   const [meta, setMeta] = useState<Meta | null>(null);
 
   const [sel, setSel] = useState<Pick | null>(null);
@@ -65,7 +67,7 @@ export default function PointCloudView({ lang, siteId }: { lang: Lang; siteId: s
   const baseSizeRef = useRef(1);
 
   useEffect(() => {
-    if (!siteId) { setLoading(false); setSel(null); setMeta(null); return; }
+    if (!cloudSite) { setLoading(false); setSel(null); setMeta(null); return; }
     let disposed = false;
     const el = host.current;
     if (!el) return;
@@ -143,7 +145,7 @@ export default function PointCloudView({ lang, siteId }: { lang: Lang; siteId: s
       try {
         const r = await fetch("/api/pointcloud/pick", {
           method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ index: hit.index, top_k: 3, site: siteId }),
+          body: JSON.stringify({ index: hit.index, top_k: 3, site: cloudSite }),
         });
         if (!r.ok) throw new Error(await r.text());
         const data: Pick = await r.json();
@@ -167,7 +169,7 @@ export default function PointCloudView({ lang, siteId }: { lang: Lang; siteId: s
     renderer.domElement.addEventListener("pointerdown", onDown);
     renderer.domElement.addEventListener("pointerup", onUp);
 
-    fetch(`/api/pointcloud/meta?site=${encodeURIComponent(siteId)}`)
+    fetch(`/api/pointcloud/meta?site=${encodeURIComponent(cloudSite)}`)
       .then((r) => r.json())
       .then(async (m: Meta) => {
         if (disposed) return;
@@ -333,8 +335,13 @@ export default function PointCloudView({ lang, siteId }: { lang: Lang; siteId: s
       if (denseRef.current) { denseRef.current.geometry.dispose(); (denseRef.current.material as THREE.Material).dispose(); }
       groundRef.current?.geometry.dispose();
       (groundRef.current?.material as THREE.Material | undefined)?.dispose();
-      trackRef.current?.geometry.dispose();
-      (trackRef.current?.material as THREE.Material | undefined)?.dispose();
+      trackRef.current?.traverse((obj) => {
+        const mesh = obj as THREE.Mesh;
+        mesh.geometry?.dispose();
+        const sm = mesh.material as THREE.Material | THREE.Material[] | undefined;
+        if (Array.isArray(sm)) sm.forEach((m) => m.dispose());
+        else sm?.dispose();
+      });
       trackCamRef.current?.geometry.dispose();
       (trackCamRef.current?.material as THREE.Material | undefined)?.dispose();
       trackPostsRef.current?.geometry.dispose();
@@ -342,7 +349,7 @@ export default function PointCloudView({ lang, siteId }: { lang: Lang; siteId: s
       renderer.dispose();
       renderer.domElement.remove();
     };
-  }, [siteId]);
+  }, [cloudSite]);
 
 
   useEffect(() => {
@@ -379,7 +386,7 @@ export default function PointCloudView({ lang, siteId }: { lang: Lang; siteId: s
 
   const view = sel?.views[viewIdx];
 
-  if (!siteId) {
+  if (!cloudSite) {
     return (
       <div className="pointcloud pc-empty-state">
         <div>
@@ -397,6 +404,10 @@ export default function PointCloudView({ lang, siteId }: { lang: Lang; siteId: s
       <div className="pc-badge">{meta?.site_name || meta?.label || t(lang, "pointCloud")} · {meta ? `${meta.count.toLocaleString()} pts${meta.dense_count ? ` + ${meta.dense_count.toLocaleString()} dense` : ""}` : "—"}</div>
       <div className="pc-hint">{t(lang, "pointPickHint")}</div>
       <div className="pc-layers" role="group" aria-label={t(lang, "pcLayers")}>
+        <select className="pc-pkg" value={cloudSite} onChange={(e) => setCloudSite(e.target.value)} aria-label={t(lang, "pcPackage")}>
+          <option value="koma_bridge">{t(lang, "pcColmap")}</option>
+          <option value="koma_pi4">{t(lang, "pcPi4")}</option>
+        </select>
 
         <button className="chip" aria-pressed={showCloud} onClick={() => {
           const next = !showCloud; setShowCloud(next);
