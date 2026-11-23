@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "gates": {
+    "points": true,
+    "source": true
+  },
+  "note": "Open LAS visual package; no defect/reprojection gate."
+}

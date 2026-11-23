@@ -11,7 +11,7 @@ type Pick = {
   metrics?: { rail_offset_m: number; height_vs_rail_m: number; scale_status: string };
   views: View[];
 };
-type Meta = { id?: string; site?: string; site_id?: string; site_name?: string; label?: string; count: number; points_url: string; dense_url?: string; dense_count?: number; note?: string; scale?: { status: string; basis: string }; scale_status?: string; link_method?: string; views: View[]; camera_track?: [number, number, number][]; track_note?: string };
+type Meta = { id?: string; site?: string; site_id?: string; site_name?: string; label?: string; count: number; points_url: string; dense_url?: string; dense_count?: number; note?: string; scale?: { status: string; basis: string }; scale_status?: string; link_method?: string; views: View[]; camera_track?: [number, number, number][]; track_note?: string; rail_tracks?: [number, number, number][][]; rail_tracks_note?: string };
 
 function heightColor(z: number, z0: number, z1: number): [number, number, number] {
   const h = z1 > z0 ? (z - z0) / (z1 - z0) : 0;
@@ -278,7 +278,21 @@ export default function PointCloudView({ lang, siteId }: { lang: Lang; siteId: s
 
         // The cab camera runs along the rail. Frame that local corridor, not the
         // distant background tracks, so the track line is actually readable.
-        if (m.camera_track?.length) {
+        if (m.rail_tracks?.length) {
+          const railGroup = new THREE.Group();
+          const railMat = new THREE.LineBasicMaterial({ color: 0x39d5ff, transparent: true, opacity: 0.95, depthTest: false });
+          for (const pts of m.rail_tracks) {
+            if (pts.length < 2) continue;
+            const line = new THREE.Line(
+              new THREE.BufferGeometry().setFromPoints(pts.map(([x, y, z]) => new THREE.Vector3(x, y, z))),
+              railMat,
+            );
+            line.renderOrder = 6;
+            railGroup.add(line);
+          }
+          scene.add(railGroup);
+          trackRef.current = railGroup;
+        } else if (m.camera_track?.length) {
           const a = m.camera_track[0], b = m.camera_track[m.camera_track.length - 1];
           let dx = b[0] - a[0], dy = b[1] - a[1];
           let len = Math.hypot(dx, dy);
@@ -346,6 +360,12 @@ export default function PointCloudView({ lang, siteId }: { lang: Lang; siteId: s
       (trackCamRef.current?.material as THREE.Material | undefined)?.dispose();
       trackPostsRef.current?.geometry.dispose();
       (trackPostsRef.current?.material as THREE.Material | undefined)?.dispose();
+      pointsRef.current = null;
+      denseRef.current = null;
+      groundRef.current = null;
+      trackRef.current = null;
+      trackCamRef.current = null;
+      trackPostsRef.current = null;
       renderer.dispose();
       renderer.domElement.remove();
     };
@@ -407,6 +427,7 @@ export default function PointCloudView({ lang, siteId }: { lang: Lang; siteId: s
         <select className="pc-pkg" value={cloudSite} onChange={(e) => setCloudSite(e.target.value)} aria-label={t(lang, "pcPackage")}>
           <option value="koma_bridge">{t(lang, "pcColmap")}</option>
           <option value="koma_pi4">{t(lang, "pcPi4")}</option>
+          <option value="tokyo_rail">{t(lang, "pcTokyo")}</option>
         </select>
 
         <button className="chip" aria-pressed={showCloud} onClick={() => {
@@ -445,7 +466,7 @@ export default function PointCloudView({ lang, siteId }: { lang: Lang; siteId: s
       </div>
       <div className="pc-legend">
         <span><i className="lg-ground" />{t(lang, "pcLegendGround")}</span>
-        <span><i className="lg-rail" />{t(lang, "pcLegendRail")}</span>
+        <span><i className="lg-rail" />{meta?.rail_tracks?.length ? t(lang, "pcLegendRailOsm") : t(lang, "pcLegendRail")}</span>
         <span><i className="lg-high" />{t(lang, "pcHeightColor")}</span>
         <em>{t(lang, "pcApproxGround")}</em>
       </div>

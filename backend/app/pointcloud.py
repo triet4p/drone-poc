@@ -13,6 +13,7 @@ from .config import DATA
 SITES: dict[str, dict] = {
     "koma_bridge": {"dir": "koma_bridge", "name": "高麗川橋梁（八高線）", "kind": "real"},
     "koma_pi4": {"dir": "koma_pi4", "name": "高麗川橋梁（八高線・Pi4）", "kind": "real"},
+    "tokyo_rail": {"dir": "tokyo_rail", "name": "東京・飯田橋周辺（国土地理院LP）", "kind": "open"},
 }
 DEFAULT_SITE = os.environ.get("POINTCLOUD_SITE", "koma_bridge")
 _CACHE: dict[str, tuple] = {}
@@ -35,7 +36,7 @@ def site_info(site: str | None) -> dict:
 
 
 def sites() -> list[dict]:
-    keys = ["koma_bridge", "koma_pi4"]
+    keys = ["koma_bridge", "koma_pi4", "tokyo_rail"]
     return [site_info(k) for k in keys if (pc_dir(k) / "meta.json").exists()]
 
 

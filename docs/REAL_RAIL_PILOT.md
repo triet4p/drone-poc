@@ -152,3 +152,18 @@ If COLMAP produces a degenerate or empty model on another site:
   `relative`, no multi-view reprojection gate.
 - Runtime ~89 s after model load; package `data/pointcloud/koma_pi4/`.
 - Not promoted to the primary demo; the COLMAP sparse+dense Koma package remains primary.
+
+## 11. Tokyo open-data trial (GSI LP 2024)
+
+- Source: GSI Tokyo 2024 airborne laser, CC BY 4.0.
+- Tile used: `Tokyo/2024/01/LP/Original/LAS/09/LD/18/09LD1800.zip`
+  (about 100 MB compressed, 198 MB LAS, 5.83 M points).
+- Tile location: **Iidabashi, Chiyoda-ku** (~139.747E, 35.701N), not Ueno.
+- Converted to a 300,000-point browser package with absolute source
+  coordinates (EPSG:6677) recentered to local metres.
+- Added OSM surface rail geometry (ODbL), plan-projected; it is not a
+  LAS-derived rail centreline.
+- Result: buildings, ground/road surface and multiple rail corridors are
+  visible. Good for context; not defect-grade or close-up inspection.
+- Package: `data/pointcloud/tokyo_rail/`; UI selector `東京・飯田橋（LP）`.
+- Attribution: 国土地理院 / GSI Tokyo 2024 LP, CC BY 4.0; OSM railway ODbL.
