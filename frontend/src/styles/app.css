@@ -371,3 +371,9 @@ body { font-size: 13px; line-height: 18px; }
 .pc-empty-state > div { max-width: 420px; text-align: center; }
 .pc-empty-state select { margin-left: 6px; }
 .pc-layers select { background: #11171c; color: #d8dee4; border: 1px solid #37444f; border-radius: 3px; font-size: 10px; }
+.nav-toggle { margin-right: 4px; }
+.dws-workspace.nav-collapsed { grid-template-columns: minmax(0, 1fr); }
+.dws-workspace.nav-collapsed .dws-sidebar { display: none; }
+.layout.point-layout { grid-template-columns: minmax(0, 1fr); }
+.layout.point-layout .list, .layout.point-layout .detail { display: none; }
+.layout.point-layout .pointcloud { height: calc(100vh - 250px); min-height: 520px; }

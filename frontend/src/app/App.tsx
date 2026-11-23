@@ -110,6 +110,7 @@ export default function App() {
   const [edit, setEdit] = useState({ structure_id: "", member_id: "", km: "", license: "unknown" });
   const [saving, setSaving] = useState(false);
   const [mode, setMode] = useState<"map" | "point" | "measure" | "photo">("map");
+  const [navCollapsed, setNavCollapsed] = useState(false);
   const [railPhoto, setRailPhoto] = useState<RailPhoto | null>(null);
 
   const tr = useCallback((k: TKey, v?: Record<string, string | number>) => t(lang, k, v), [lang]);
@@ -339,6 +340,8 @@ export default function App() {
     <div className="dws-shell">
       <a className="skip-link" href="#main">本文へスキップ</a>
       <header className="dws-topbar appbar">
+        <button className="btn btn-sm nav-toggle" onClick={() => setNavCollapsed((v) => !v)}
+          aria-label="Toggle sidebar" title="Toggle sidebar">☰</button>
         <div className="brand"><span className="mark">軌</span><span className="brand-name">{tr("appTitle")}</span><span className="tag">{tr("appTag")}</span></div>
         <div className="ctx">{imageSite === "koma_bridge"
           ? <><b>高麗川橋梁（八高線）</b>　35.909N / 139.334E　11/2026</>
@@ -362,7 +365,7 @@ export default function App() {
         </button>
       </header>
 
-      <div className="dws-workspace">
+      <div className={`dws-workspace ${navCollapsed ? "nav-collapsed" : ""}`}>
         <aside className="dws-sidebar sidenav" aria-label="画面">
           <div className="side-label">点検ワークスペース</div>
           {TABS.map((x) => (
@@ -422,7 +425,7 @@ export default function App() {
       )}
 
       {tab === "inspect" && (
-      <div className="layout"
+      <div className={`layout ${mode === "point" ? "point-layout" : ""}`}
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => { e.preventDefault(); uploadFiles(e.dataTransfer.files); }}>
         <aside className="panel list" aria-label={tr("listTitle")}>
@@ -571,7 +574,9 @@ export default function App() {
 
           {!det ? (
             <div className="empty">
-              {image ? tr("pick", { n: image.detections.length }) : tr("uploadFirst")}
+              {imageSite === "koma_bridge"
+                ? <><b>Point cloud sample</b><p>この画像は点群の実在サイト確認用です。欠損の AI 候補は 0 件です。「点群」で点をクリックすると、その点を観測した元フレームが表示されます。</p></>
+                : image ? tr("pick", { n: image.detections.length }) : tr("uploadFirst")}
             </div>
           ) : (
             <>
