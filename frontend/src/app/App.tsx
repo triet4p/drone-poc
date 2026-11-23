@@ -94,6 +94,7 @@ export default function App() {
   const [data, setData] = useState<State | null>(null);
   const [assets, setAssets] = useState<Structure[]>([]);
   const [imgId, setImgId] = useState<string | null>(null);
+  const [pcSite, setPcSite] = useState<string | null>(null);
   const [detId, setDetId] = useState<number | null>(null);
   const [filter, setFilter] = useState<"all" | "open" | "done">("all");
   const [rank, setRank] = useState<string | null>(null);
@@ -176,6 +177,8 @@ export default function App() {
   }, [running.length, refresh]);
 
   const image = data?.images.find((i) => i.id === imgId) ?? null;
+  const imageSite = image?.structure_id === "B14" ? "b14" : null;
+  useEffect(() => { setPcSite(imageSite); }, [imgId, imageSite]);
   const det = image?.detections.find((d) => d.id === detId) ?? null;
 
   useEffect(() => {
@@ -467,7 +470,7 @@ export default function App() {
             {image && <a className="mini-link" href={`/api/original/${image.id}`} target="_blank" rel="noreferrer">{tr("original")}</a>}
           </div>
           {mode === "point" ? (
-            <PointCloudView lang={lang} />
+            <PointCloudView lang={lang} siteId={pcSite} onSite={setPcSite} />
           ) : mode !== "photo" ? (
             <MapView images={data?.images ?? []} selectedId={imgId} lang={lang}
               measure={mode === "measure"} onSelect={(id) => setImgId(id)} />

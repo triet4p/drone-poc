@@ -33,28 +33,45 @@ def startup():
     threading.Thread(target=lambda: ensure_model(), daemon=True).start()
 
 
+@app.get("/api/pointcloud/sites")
+def pc_sites():
+    return {"default": pointcloud.DEFAULT_SITE, "sites": pointcloud.sites()}
+
+
 @app.get("/api/pointcloud/meta")
-def pc_meta():
-    return pointcloud.meta()
+def pc_meta(site: str | None = None):
+    try:
+        return pointcloud.meta(site)
+    except KeyError:
+        raise HTTPException(404, "point cloud site not found")
 
 
 @app.get("/api/pointcloud/points.bin")
-def pc_points():
-    return FileResponse(pointcloud.PC / "points.bin", media_type="application/octet-stream")
+def pc_points(site: str | None = None):
+    try:
+        return FileResponse(pointcloud.pc_dir(site) / "points.bin", media_type="application/octet-stream")
+    except KeyError:
+        raise HTTPException(404, "point cloud site not found")
 
 
 @app.get("/api/pointcloud/view/{name}")
-def pc_view(name: str):
-    p = pointcloud.view_file(name)
+def pc_view(name: str, site: str | None = None):
+    try:
+        p = pointcloud.view_file(site, name)
+    except KeyError:
+        raise HTTPException(404, "point cloud site not found")
     if not p or not p.is_file():
         raise HTTPException(404, "view not found")
     return FileResponse(p, headers={"Cache-Control": "public, max-age=3600"})
 
 
 @app.get("/api/pointcloud/dense.bin")
-def pc_dense():
-    path = pointcloud.PC / "dense.bin"
-    if not path.exists():
+def pc_dense(site: str | None = None):
+    try:
+        path = pointcloud.dense_file(site)
+    except KeyError:
+        raise HTTPException(404, "point cloud site not found")
+    if not path:
         raise HTTPException(404, "dense cloud not found")
     return FileResponse(path, media_type="application/octet-stream")
 
@@ -62,7 +79,9 @@ def pc_dense():
 @app.post("/api/pointcloud/pick")
 def pc_pick(q: PointPick):
     try:
-        return pointcloud.pick(q.index, q.top_k)
+        return pointcloud.pick(q.site, q.index, q.top_k)
+    except KeyError:
+        raise HTTPException(404, "point cloud site not found")
     except IndexError:
         raise HTTPException(404, "point not found")
 

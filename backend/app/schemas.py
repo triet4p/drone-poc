@@ -18,3 +18,4 @@ class ImagePatch(BaseModel):
 class PointPick(BaseModel):
     index: int = Field(ge=0)
     top_k: int = Field(default=3, ge=1, le=5)
+    site: str | None = None

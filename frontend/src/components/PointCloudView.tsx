@@ -11,11 +11,13 @@ type Pick = {
   metrics?: { rail_offset_m: number; height_vs_rail_m: number; scale_status: string };
   views: View[];
 };
-type Meta = { id?: string; site_id?: string; site_name?: string; label?: string; count: number; points_url: string; dense_url?: string; dense_count?: number; note?: string; scale?: { status: string; basis: string }; scale_status?: string; link_method?: string; views: View[] };
+type Meta = { id?: string; site?: string; site_id?: string; site_name?: string; label?: string; count: number; points_url: string; dense_url?: string; dense_count?: number; note?: string; scale?: { status: string; basis: string }; scale_status?: string; link_method?: string; views: View[] };
+type Site = { site: string; name: string; kind: string; available: boolean };
 
-export default function PointCloudView({ lang }: { lang: Lang }) {
+export default function PointCloudView({ lang, siteId, onSite }: { lang: Lang; siteId: string | null; onSite: (s: string | null) => void }) {
   const host = useRef<HTMLDivElement>(null);
   const [meta, setMeta] = useState<Meta | null>(null);
+  const [sites, setSites] = useState<Site[]>([]);
   const [sel, setSel] = useState<Pick | null>(null);
   const [viewIdx, setViewIdx] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -36,9 +38,17 @@ export default function PointCloudView({ lang }: { lang: Lang }) {
   const baseSizeRef = useRef(1);
 
   useEffect(() => {
+    fetch("/api/pointcloud/sites").then((r) => r.json()).then((d) => setSites(d.sites || [])).catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    if (!siteId) { setLoading(false); setSel(null); setMeta(null); return; }
     let disposed = false;
     const el = host.current;
     if (!el) return;
+    setLoading(true);
+    setError(null);
+    setSel(null);
     let renderer: THREE.WebGLRenderer;
     let points: THREE.Points;
     let positions: Float32Array | null = null;
@@ -99,7 +109,7 @@ export default function PointCloudView({ lang }: { lang: Lang }) {
       try {
         const r = await fetch("/api/pointcloud/pick", {
           method: "POST", headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ index: hit.index, top_k: 3 }),
+          body: JSON.stringify({ index: hit.index, top_k: 3, site: siteId }),
         });
         if (!r.ok) throw new Error(await r.text());
         const data: Pick = await r.json();
@@ -123,7 +133,7 @@ export default function PointCloudView({ lang }: { lang: Lang }) {
     renderer.domElement.addEventListener("pointerdown", onDown);
     renderer.domElement.addEventListener("pointerup", onUp);
 
-    fetch("/api/pointcloud/meta")
+    fetch(`/api/pointcloud/meta?site=${encodeURIComponent(siteId)}`)
       .then((r) => r.json())
       .then(async (m: Meta) => {
         if (disposed) return;
@@ -226,9 +236,26 @@ export default function PointCloudView({ lang }: { lang: Lang }) {
       renderer.dispose();
       renderer.domElement.remove();
     };
-  }, []);
+  }, [siteId]);
 
   const view = sel?.views[viewIdx];
+
+  if (!siteId) {
+    return (
+      <div className="pointcloud pc-empty-state">
+        <div>
+          <b>{t(lang, "pcNoSite")}</b>
+          <p>{t(lang, "pcNoSiteBody")}</p>
+          <label>{t(lang, "pcSite")}
+            <select value="" onChange={(e) => onSite(e.target.value || null)}>
+              <option value="">—</option>
+              {sites.map((x) => <option key={x.site} value={x.site}>{x.name}</option>)}
+            </select>
+          </label>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="pointcloud">
@@ -236,6 +263,11 @@ export default function PointCloudView({ lang }: { lang: Lang }) {
       <div className="pc-badge">{meta?.site_name || meta?.label || t(lang, "pointCloud")} · {meta ? `${meta.count.toLocaleString()} pts` : "—"}</div>
       <div className="pc-hint">{t(lang, "pointPickHint")}</div>
       <div className="pc-layers" role="group" aria-label={t(lang, "pcLayers")}>
+        <label className="pc-slider">{t(lang, "pcSite")}
+          <select value={siteId} onChange={(e) => onSite(e.target.value || null)}>
+            {sites.map((x) => <option key={x.site} value={x.site}>{x.name}</option>)}
+          </select>
+        </label>
         <button className="chip" aria-pressed={showCloud} onClick={() => {
           const next = !showCloud; setShowCloud(next);
           if (pointsRef.current) pointsRef.current.visible = next;
@@ -299,7 +331,7 @@ export default function PointCloudView({ lang }: { lang: Lang }) {
           {view && showPhoto ? (
             <>
               <div className="pc-img-wrap">
-                <img src={`${view.url}?v=${view.image_id}`} alt={view.image_id} />
+                <img src={view.url} alt={view.image_id} />
                 <i style={{ left: `${(view.u / view.width) * 100}%`, top: `${(view.v / view.height) * 100}%` }} />
               </div>
               <div className="pc-source-meta">{view.image_id} · {view.captured_at || ""}</div>
