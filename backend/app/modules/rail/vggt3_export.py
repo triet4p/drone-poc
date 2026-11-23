@@ -72,7 +72,7 @@ def main() -> None:
     obs_u: list[float] = []
     obs_v: list[float] = []
     stride = max(1, args.stride)
-    for i in range(depth.shape[0]):
+    for i in range(points3d.shape[0]):
         c = conf[i]
         if np.isfinite(c).any():
             thresh = float(np.quantile(c[np.isfinite(c)], args.conf_quantile))
