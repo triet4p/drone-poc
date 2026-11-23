@@ -377,3 +377,17 @@ body { font-size: 13px; line-height: 18px; }
 .layout.point-layout { grid-template-columns: minmax(0, 1fr); }
 .layout.point-layout .list, .layout.point-layout .detail { display: none; }
 .layout.point-layout .pointcloud { height: calc(100vh - 250px); min-height: 520px; }
+
+/* One 3D workspace: map and point cloud are layers, not tabs. */
+.spatial-view { position: relative; height: min(64vh, 620px); overflow: hidden; background: #11171c; }
+.spatial-view > .map3d, .spatial-view > .pointcloud { height: 100%; }
+.spatial-switch { position: absolute; left: 50%; top: 10px; transform: translateX(-50%); z-index: 6;
+  display: flex; align-items: center; gap: 3px; background: rgba(17,23,28,.9); color: #d8dee4;
+  border: 1px solid #37444f; border-radius: 8px; padding: 3px 5px; font-size: 11px; white-space: nowrap; }
+.spatial-switch > span { color: #8f9aa4; padding: 0 4px; }
+.spatial-switch button { border: 1px solid transparent; background: transparent; color: #d8dee4;
+  border-radius: 5px; padding: 3px 8px; font-size: 11.5px; cursor: pointer; }
+.spatial-switch button[aria-pressed="true"] { background: #e8ecf0; color: #11171c; border-color: #e8ecf0; font-weight: 700; }
+.layout.point-layout .spatial-view { height: calc(100vh - 250px); min-height: 520px; }
+.layout.point-layout .spatial-view .pointcloud { height: 100%; }
+@media (max-width: 720px) { .spatial-view { height: 46vh; } }

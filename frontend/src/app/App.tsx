@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DEFECTS, LANGS, LOCALE, RANK_TIP, t, type Lang, type TKey } from "../lib/i18n";
 import MapView from "../components/MapView";
-import PointCloudView from "../components/PointCloudView";
+import SpatialView, { type SpatialLayer } from "../components/SpatialView";
 import { AnalysisView } from "../features/analysis/AnalysisView";
 import { PlanView } from "../features/plan/PlanView";
 import { PriorityView } from "../features/priority/PriorityView";
@@ -109,7 +109,8 @@ export default function App() {
   const [tab, setTab] = useState<"sched" | "plan" | "inspect" | "anal" | "prio">("inspect");
   const [edit, setEdit] = useState({ structure_id: "", member_id: "", km: "", license: "unknown" });
   const [saving, setSaving] = useState(false);
-  const [mode, setMode] = useState<"map" | "point" | "measure" | "photo">("map");
+  const [mode, setMode] = useState<"map" | "measure" | "photo">("map");
+  const [spatialLayer, setSpatialLayer] = useState<SpatialLayer>("map");
   const [navCollapsed, setNavCollapsed] = useState(false);
   const [railPhoto, setRailPhoto] = useState<RailPhoto | null>(null);
 
@@ -425,7 +426,7 @@ export default function App() {
       )}
 
       {tab === "inspect" && (
-      <div className={`layout ${mode === "point" ? "point-layout" : ""}`}
+      <div className={`layout ${mode === "map" && spatialLayer === "cloud" ? "point-layout" : ""}`}
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => { e.preventDefault(); uploadFiles(e.dataTransfer.files); }}>
         <aside className="panel list" aria-label={tr("listTitle")}>
@@ -473,17 +474,18 @@ export default function App() {
             <span>{image ? tr("meta", { w: image.width, h: image.height, n: image.detections.length }) : ""}</span>
             <div className="view-toggle" role="group" aria-label="3D / photo">
               <button aria-pressed={mode === "map"} onClick={() => setMode("map")}>3D</button>
-              <button aria-pressed={mode === "point"} onClick={() => setMode("point")}>{tr("pointCloud")}</button>
               <button aria-pressed={mode === "measure"} onClick={() => setMode("measure")}>{tr("measure")}</button>
               <button aria-pressed={mode === "photo"} onClick={() => setMode("photo")}>写真</button>
             </div>
             {image && <a className="mini-link" href={`/api/original/${image.id}`} target="_blank" rel="noreferrer">{tr("original")}</a>}
           </div>
-          {mode === "point" ? (
-            <PointCloudView lang={lang} siteId={imageSite} />
-          ) : mode !== "photo" ? (
+          {mode === "map" ? (
+            <SpatialView layer={spatialLayer} onLayerChange={setSpatialLayer}
+              images={data?.images ?? []} selectedId={imgId} lang={lang} siteId={imageSite}
+              onSelect={(id) => setImgId(id)} />
+          ) : mode === "measure" ? (
             <MapView images={data?.images ?? []} selectedId={imgId} lang={lang} siteId={imageSite}
-              measure={mode === "measure"} onSelect={(id) => setImgId(id)} />
+              measure onSelect={(id) => setImgId(id)} />
           ) : (
           <div className="stage-wrap" ref={wrapRef}
             onPointerDown={(e) => {
