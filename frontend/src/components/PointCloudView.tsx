@@ -251,7 +251,7 @@ export default function PointCloudView({ lang, siteId }: { lang: Lang; siteId: s
   return (
     <div className="pointcloud">
       <div ref={host} className="pc-canvas" />
-      <div className="pc-badge">{meta?.site_name || meta?.label || t(lang, "pointCloud")} · {meta ? `${meta.count.toLocaleString()} pts` : "—"}</div>
+      <div className="pc-badge">{meta?.site_name || meta?.label || t(lang, "pointCloud")} · {meta ? `${meta.count.toLocaleString()} pts${meta.dense_count ? ` + ${meta.dense_count.toLocaleString()} dense` : ""}` : "—"}</div>
       <div className="pc-hint">{t(lang, "pointPickHint")}</div>
       <div className="pc-layers" role="group" aria-label={t(lang, "pcLayers")}>
 
