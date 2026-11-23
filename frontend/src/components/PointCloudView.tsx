@@ -424,10 +424,17 @@ export default function PointCloudView({ lang, siteId }: { lang: Lang; siteId: s
       <div className="pc-badge">{meta?.site_name || meta?.label || t(lang, "pointCloud")} · {meta ? `${meta.count.toLocaleString()} pts${meta.dense_count ? ` + ${meta.dense_count.toLocaleString()} dense` : ""}` : "—"}</div>
       <div className="pc-hint">{t(lang, "pointPickHint")}</div>
       <div className="pc-layers" role="group" aria-label={t(lang, "pcLayers")}>
+        <span className={`pc-kind ${meta?.link_method === "open_las" ? "context" : "detail"}`}>
+          {meta?.link_method === "open_las" ? "CONTEXT" : "DETAIL"}
+        </span>
         <select className="pc-pkg" value={cloudSite} onChange={(e) => setCloudSite(e.target.value)} aria-label={t(lang, "pcPackage")}>
-          <option value="koma_bridge">{t(lang, "pcColmap")}</option>
-          <option value="koma_pi4">{t(lang, "pcPi4")}</option>
-          <option value="tokyo_rail">{t(lang, "pcTokyo")}</option>
+          <optgroup label={t(lang, "pcDetailGroup")}>
+            <option value="koma_bridge">{t(lang, "pcColmap")}</option>
+            <option value="koma_pi4">{t(lang, "pcPi4")}</option>
+          </optgroup>
+          <optgroup label={t(lang, "pcContextGroup")}>
+            <option value="tokyo_rail">{t(lang, "pcTokyo")}</option>
+          </optgroup>
         </select>
 
         <button className="chip" aria-pressed={showCloud} onClick={() => {
@@ -468,7 +475,7 @@ export default function PointCloudView({ lang, siteId }: { lang: Lang; siteId: s
         <span><i className="lg-ground" />{t(lang, "pcLegendGround")}</span>
         <span><i className="lg-rail" />{meta?.rail_tracks?.length ? t(lang, "pcLegendRailOsm") : t(lang, "pcLegendRail")}</span>
         <span><i className="lg-high" />{t(lang, "pcHeightColor")}</span>
-        <em>{t(lang, "pcApproxGround")}</em>
+        <em>{meta?.link_method === "open_las" ? t(lang, "pcContextNote") : t(lang, "pcApproxGround")}</em>
       </div>
       <div className="pc-sparse-note">{t(lang, "pcSparseNote")}</div>
       {!sel && meta?.views?.[0] ? (() => {

@@ -408,3 +408,7 @@ body { font-size: 13px; line-height: 18px; }
   background: rgba(17,23,28,.9); border: 1px solid #37444f; border-radius: 5px; padding: 3px; }
 .pc-context img { display: block; width: 100%; height: 96px; object-fit: cover; border-radius: 3px; }
 .pc-context span { display: block; color: #b3bbc2; font-size: 9.5px; padding: 3px 2px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.pc-kind { font-size: 9px; letter-spacing: .04em; padding: 3px 5px; border-radius: 3px; border: 1px solid #37444f; color: #d8dee4; background: rgba(17,23,28,.86); }
+.pc-kind.detail { border-color: #39d5ff; color: #9be9ff; }
+.pc-kind.context { border-color: #d9a800; color: #ffe08a; }
