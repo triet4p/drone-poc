@@ -45,7 +45,7 @@ def main() -> None:
     dtype = torch.bfloat16 if device == "cuda" and torch.cuda.get_device_capability()[0] >= 8 else torch.float16
     print(f"[vggt] device={device} dtype={dtype}")
     model = VGGT.from_pretrained("nvidia/vgg-ttt").eval().cuda()
-    images = load_and_preprocess_images(paths, mode="pad", target_size=args.target_size).to(device)
+    images = load_and_preprocess_images([str(q) for q in paths], mode="pad", target_size=args.target_size).to(device)
     with torch.no_grad():
         preds = model.infer(images)
     points3d = preds["pts3d"].detach().float().cpu().numpy()

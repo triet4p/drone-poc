@@ -359,3 +359,8 @@ body { font-size: 13px; line-height: 18px; }
   background: var(--dws-danger); transform: translate(-50%,-50%); box-shadow: 0 0 0 2px rgba(0,0,0,.5); }
 .pc-viewrow { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
 .pc-note { font-size: 10.5px; color: var(--dws-text-muted); margin: 6px 0 0; line-height: 1.5; }
+.pc-layers { position: absolute; left: 10px; top: 42px; display: flex; gap: 4px; }
+.pc-layers .chip { background: rgba(17,23,28,.86); color: #d8dee4; border: 1px solid #37444f; }
+.pc-layers .chip[aria-pressed="true"] { border-color: var(--dws-accent); color: #fff; }
+.pc-source-meta { font-size: 10px; color: var(--dws-text-muted); margin-top: 4px; overflow-wrap: anywhere; }
+.pc-actions { display: flex; gap: 4px; }

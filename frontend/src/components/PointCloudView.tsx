@@ -21,6 +21,13 @@ export default function PointCloudView({ lang }: { lang: Lang }) {
   const [loading, setLoading] = useState(true);
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const controlsRef = useRef<OrbitControls | null>(null);
+  const homeRef = useRef<{ pos: THREE.Vector3; target: THREE.Vector3 } | null>(null);
+  const pointsRef = useRef<THREE.Points | null>(null);
+  const gridRef = useRef<THREE.GridHelper | null>(null);
+  const axesRef = useRef<THREE.AxesHelper | null>(null);
+  const [showCloud, setShowCloud] = useState(true);
+  const [showGrid, setShowGrid] = useState(false);
+  const [showPhoto, setShowPhoto] = useState(true);
 
   useEffect(() => {
     let disposed = false;
@@ -28,6 +35,9 @@ export default function PointCloudView({ lang }: { lang: Lang }) {
     if (!el) return;
     let renderer: THREE.WebGLRenderer;
     let points: THREE.Points;
+    let positions: Float32Array | null = null;
+    let cloudRadius = 1;
+    let selectedMarker: THREE.Mesh | null = null;
     try {
       renderer = new THREE.WebGLRenderer({ antialias: true });
     } catch {
@@ -56,11 +66,18 @@ export default function PointCloudView({ lang }: { lang: Lang }) {
     const grid = new THREE.GridHelper(420, 42, 0x2e3a46, 0x252f36);
     grid.rotation.x = Math.PI / 2;
     grid.position.set(180, 0, 0);
+    gridRef.current = grid;
     const gm = grid.material as THREE.Material;
     gm.transparent = true; gm.opacity = 0.22;
     scene.add(grid);
     const axes = new THREE.AxesHelper(20);
+    axesRef.current = axes;
     scene.add(axes);
+
+    const markerGeo = new THREE.SphereGeometry(1, 16, 16);
+    selectedMarker = new THREE.Mesh(markerGeo, new THREE.MeshBasicMaterial({ color: 0xffd166 }));
+    selectedMarker.visible = false;
+    scene.add(selectedMarker);
 
     const raycaster = new THREE.Raycaster();
     raycaster.params.Points = { threshold: 0.25 };
@@ -80,6 +97,12 @@ export default function PointCloudView({ lang }: { lang: Lang }) {
         });
         if (!r.ok) throw new Error(await r.text());
         const data: Pick = await r.json();
+        if (positions && selectedMarker) {
+          const k = hit.index * 3;
+          selectedMarker.position.set(positions[k], positions[k + 1], positions[k + 2]);
+          selectedMarker.scale.setScalar(Math.max(cloudRadius * 0.018, 0.01));
+          selectedMarker.visible = true;
+        }
         setSel(data);
         setViewIdx(0);
       } catch (e) {
@@ -116,6 +139,7 @@ export default function PointCloudView({ lang }: { lang: Lang }) {
           size: 0.075, vertexColors: true, sizeAttenuation: true,
         });
         points = new THREE.Points(geo, material);
+        pointsRef.current = points;
         scene.add(points);
         if (m.link_method && geo.boundingSphere) {
           const sphere = geo.boundingSphere;
@@ -130,10 +154,12 @@ export default function PointCloudView({ lang }: { lang: Lang }) {
           camera.far = radius * 100;
           camera.updateProjectionMatrix();
           controls.update();
+          cloudRadius = radius;
           material.size = Math.max(radius * 0.009, 0.01);
           raycaster.params.Points = { threshold: Math.max(radius * 0.02, 0.02) };
           grid.visible = false;
           axes.visible = false;
+          homeRef.current = { pos: camera.position.clone(), target: controls.target.clone() };
         }
         setLoading(false);
       })
@@ -160,6 +186,7 @@ export default function PointCloudView({ lang }: { lang: Lang }) {
       renderer.domElement.removeEventListener("pointerup", onUp);
       controls.dispose();
       if (points) { points.geometry.dispose(); (points.material as THREE.Material).dispose(); }
+      if (selectedMarker) { selectedMarker.geometry.dispose(); (selectedMarker.material as THREE.Material).dispose(); }
       renderer.dispose();
       renderer.domElement.remove();
     };
@@ -172,13 +199,34 @@ export default function PointCloudView({ lang }: { lang: Lang }) {
       <div ref={host} className="pc-canvas" />
       <div className="pc-badge">{meta?.site_name || meta?.label || t(lang, "pointCloud")} · {meta ? `${meta.count.toLocaleString()} pts` : "—"}</div>
       <div className="pc-hint">{t(lang, "pointPickHint")}</div>
+      <div className="pc-layers" role="group" aria-label={t(lang, "pcLayers")}>
+        <button className="chip" aria-pressed={showCloud} onClick={() => {
+          const next = !showCloud; setShowCloud(next);
+          if (pointsRef.current) pointsRef.current.visible = next;
+        }}>{t(lang, "pcCloud")}</button>
+        <button className="chip" aria-pressed={showGrid} onClick={() => {
+          const next = !showGrid; setShowGrid(next);
+          if (gridRef.current) gridRef.current.visible = next;
+          if (axesRef.current) axesRef.current.visible = next;
+        }}>{t(lang, "pcGrid")}</button>
+        <button className="chip" aria-pressed={showPhoto} onClick={() => setShowPhoto(!showPhoto)}>{t(lang, "pcPhoto")}</button>
+      </div>
       {loading && <div className="pc-loading">{t(lang, "loading")}</div>}
       {error && <div className="pc-error">{error}</div>}
       {sel && (
         <div className="pc-panel" role="dialog" aria-label={t(lang, "pointDetail")}>
           <div className="pc-head">
             <b>{sel.site || sel.member}</b>
-            <button className="btn btn-sm" onClick={() => setSel(null)}>{t(lang, "prioClose")}</button>
+            <span className="pc-actions">
+              <button className="btn btn-sm" onClick={() => {
+                if (homeRef.current && cameraRef.current && controlsRef.current) {
+                  cameraRef.current.position.copy(homeRef.current.pos);
+                  controlsRef.current.target.copy(homeRef.current.target);
+                  controlsRef.current.update();
+                }
+              }}>{t(lang, "pcReset")}</button>
+              <button className="btn btn-sm" onClick={() => setSel(null)}>{t(lang, "prioClose")}</button>
+            </span>
           </div>
           <dl className="pc-metrics">
             {sel.metrics ? (
@@ -189,16 +237,18 @@ export default function PointCloudView({ lang }: { lang: Lang }) {
                 <dt>{t(lang, "pcHeight")}</dt><dd>{sel.metrics.height_vs_rail_m >= 0 ? "+" : ""}{sel.metrics.height_vs_rail_m.toFixed(2)} m</dd>
               </>
             ) : null}
+            {sel.local ? <><dt>{t(lang, "pcLocal")}</dt><dd>X {sel.local.x} · Y {sel.local.y} · Z {sel.local.z}</dd></> : null}
             <dt>{t(lang, "pcScale")}</dt><dd>{t(lang, "pcScaleRelative")}</dd>
             {sel.link_method ? <><dt>{t(lang, "pcLinkMethod")}</dt><dd>{sel.link_method}</dd></> : null}
             {view?.residual != null ? <><dt>{t(lang, "pcResidual")}</dt><dd>{view.residual.toFixed(2)} px</dd></> : null}
           </dl>
-          {view ? (
+          {view && showPhoto ? (
             <>
               <div className="pc-img-wrap">
                 <img src={`${view.url}?v=${view.image_id}`} alt={view.image_id} />
                 <i style={{ left: `${(view.u / view.width) * 100}%`, top: `${(view.v / view.height) * 100}%` }} />
               </div>
+              <div className="pc-source-meta">{view.image_id} · {view.captured_at || ""}</div>
               <div className="pc-viewrow">
                 {sel.views.map((v, i) => (
                   <button key={v.image_id} className="chip" aria-pressed={i === viewIdx}
@@ -208,7 +258,7 @@ export default function PointCloudView({ lang }: { lang: Lang }) {
               {view.source_url ? <p className="pc-note"><a href={view.source_url} target="_blank" rel="noreferrer">{t(lang, "pcSource")} ↗</a></p> : null}
               <p className="pc-note">{meta?.note || t(lang, "pointCloudNote")}</p>
             </>
-          ) : <p className="pc-note">{t(lang, "pcNoView")}</p>}
+          ) : showPhoto ? <p className="pc-note">{t(lang, "pcNoView")}</p> : null}
         </div>
       )}
     </div>
