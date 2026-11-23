@@ -14,10 +14,10 @@ type Pick = {
 type Meta = { id?: string; site?: string; site_id?: string; site_name?: string; label?: string; count: number; points_url: string; dense_url?: string; dense_count?: number; note?: string; scale?: { status: string; basis: string }; scale_status?: string; link_method?: string; views: View[] };
 type Site = { site: string; name: string; kind: string; available: boolean };
 
-export default function PointCloudView({ lang, siteId, onSite }: { lang: Lang; siteId: string | null; onSite: (s: string | null) => void }) {
+export default function PointCloudView({ lang, siteId }: { lang: Lang; siteId: string | null }) {
   const host = useRef<HTMLDivElement>(null);
   const [meta, setMeta] = useState<Meta | null>(null);
-  const [sites, setSites] = useState<Site[]>([]);
+
   const [sel, setSel] = useState<Pick | null>(null);
   const [viewIdx, setViewIdx] = useState(0);
   const [error, setError] = useState<string | null>(null);
@@ -36,10 +36,6 @@ export default function PointCloudView({ lang, siteId, onSite }: { lang: Lang; s
   const [pointSize, setPointSize] = useState(1);
   const [pointOpacity, setPointOpacity] = useState(1);
   const baseSizeRef = useRef(1);
-
-  useEffect(() => {
-    fetch("/api/pointcloud/sites").then((r) => r.json()).then((d) => setSites(d.sites || [])).catch(() => {});
-  }, []);
 
   useEffect(() => {
     if (!siteId) { setLoading(false); setSel(null); setMeta(null); return; }
@@ -246,12 +242,7 @@ export default function PointCloudView({ lang, siteId, onSite }: { lang: Lang; s
         <div>
           <b>{t(lang, "pcNoSite")}</b>
           <p>{t(lang, "pcNoSiteBody")}</p>
-          <label>{t(lang, "pcSite")}
-            <select value="" onChange={(e) => onSite(e.target.value || null)}>
-              <option value="">—</option>
-              {sites.map((x) => <option key={x.site} value={x.site}>{x.name}</option>)}
-            </select>
-          </label>
+
         </div>
       </div>
     );
@@ -263,11 +254,7 @@ export default function PointCloudView({ lang, siteId, onSite }: { lang: Lang; s
       <div className="pc-badge">{meta?.site_name || meta?.label || t(lang, "pointCloud")} · {meta ? `${meta.count.toLocaleString()} pts` : "—"}</div>
       <div className="pc-hint">{t(lang, "pointPickHint")}</div>
       <div className="pc-layers" role="group" aria-label={t(lang, "pcLayers")}>
-        <label className="pc-slider">{t(lang, "pcSite")}
-          <select value={siteId} onChange={(e) => onSite(e.target.value || null)}>
-            {sites.map((x) => <option key={x.site} value={x.site}>{x.name}</option>)}
-          </select>
-        </label>
+
         <button className="chip" aria-pressed={showCloud} onClick={() => {
           const next = !showCloud; setShowCloud(next);
           if (pointsRef.current) pointsRef.current.visible = next;

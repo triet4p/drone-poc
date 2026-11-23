@@ -37,8 +37,9 @@ function style(photo: boolean): StyleSpecification {
 }
 
 export default function MapView({
-  images, selectedId, onSelect, measure = false, lang,
-}: { images: Img[]; selectedId: string | null; onSelect: (id: string) => void; measure?: boolean; lang: Lang }) {
+  images, selectedId, onSelect, measure = false, lang, siteId,
+}: { images: Img[]; selectedId: string | null; onSelect: (id: string) => void; measure?: boolean; lang: Lang; siteId?: string | null }) {
+  const koma = siteId === "koma_bridge";
   const box = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MlMap | null>(null);
   const [ready, setReady] = useState(false);
@@ -101,10 +102,10 @@ export default function MapView({
     const map = new MlMap({
       container: box.current,
       style: style(true),
-      center: kmToLngLat(13450),
-      zoom: 13.9,
-      pitch: 58,
-      bearing: -12,
+      center: koma ? [139.33398, 35.908963] : kmToLngLat(13450),
+      zoom: koma ? 14.4 : 13.9,
+      pitch: koma ? 45 : 58,
+      bearing: koma ? 0 : -12,
       attributionControl: false,
       maxPitch: 80,
     });
@@ -116,7 +117,20 @@ export default function MapView({
     }));
 
     const addLayers = () => {
-      if (map.getSource("track")) return;
+      if (map.getSource("track") || map.getSource("koma-site")) return;
+      if (koma) {
+        map.addSource("koma-site", {
+          type: "geojson",
+          data: { type: "Feature", properties: {}, geometry: { type: "Point", coordinates: [139.33398, 35.908963] } },
+        });
+        map.addLayer({
+          id: "koma-site", type: "circle", source: "koma-site",
+          paint: { "circle-radius": 9, "circle-color": "#d9a800", "circle-stroke-color": "#1d2328", "circle-stroke-width": 2 },
+        });
+        setReady(true);
+        (window as unknown as { __map?: MlMap }).__map = map;
+        return;
+      }
       map.addSource("track", { type: "geojson", data: track.line });
       map.addSource("ballast", { type: "geojson", data: { type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: TRACK_LINE } } });
       map.addSource("railL", { type: "geojson", data: { type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: RAILS.left } } });
@@ -219,7 +233,7 @@ export default function MapView({
     map.on("style.load", addLayers);
     map.on("load", addLayers);
 
-    map.on("click", "findings", (e: MapLayerMouseEvent) => {
+    if (!koma) map.on("click", "findings", (e: MapLayerMouseEvent) => {
       const id = e.features?.[0]?.properties?.id;
       if (typeof id === "string") {
         onSelect(id);
@@ -227,33 +241,37 @@ export default function MapView({
         if (c) map.flyTo({ center: c, zoom: 15.4, duration: 650 });
       }
     });
-    map.on("click", "survey", (e: MapLayerMouseEvent) => {
+    if (!koma) map.on("click", "survey", (e: MapLayerMouseEvent) => {
       const id = e.features?.[0]?.properties?.id;
       if (typeof id !== "string") return;
       setPicks((prev) => prev.length === 0 ? [id] : prev.length === 1 ? (prev[0] === id ? prev : [prev[0], id]) : [id]);
     });
-    map.on("mouseenter", "survey", () => { map.getCanvas().style.cursor = "pointer"; });
-    map.on("mouseleave", "survey", () => { map.getCanvas().style.cursor = ""; });
-    map.on("mouseenter", "findings", () => { map.getCanvas().style.cursor = "pointer"; });
-    map.on("mouseleave", "findings", () => { map.getCanvas().style.cursor = ""; });
+    if (!koma) {
+      map.on("mouseenter", "survey", () => { map.getCanvas().style.cursor = "pointer"; });
+      map.on("mouseleave", "survey", () => { map.getCanvas().style.cursor = ""; });
+      map.on("mouseenter", "findings", () => { map.getCanvas().style.cursor = "pointer"; });
+      map.on("mouseleave", "findings", () => { map.getCanvas().style.cursor = ""; });
+    }
 
     const ro = new ResizeObserver(() => map.resize());
     ro.observe(box.current);
     return () => { ro.disconnect(); map.remove(); mapRef.current = null; };
-    // map is created once; data updates go through the effects below
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    // re-create when the area changes
+  }, [koma]);
 
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !ready) return;
-    (map.getSource("findings") as GeoJSONSource).setData(markers);
+    const fs = map.getSource("findings") as GeoJSONSource | undefined;
+    if (!fs) return;
+    fs.setData(markers);
     map.setFilter("selected", ["==", ["get", "id"], selectedId ?? ""]);
   }, [markers, selectedId, ready, images]);
 
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !ready) return;
+    if (!map.getLayer("survey")) return;
     map.setLayoutProperty("survey", "visibility", measure ? "visible" : "none");
     map.setLayoutProperty("measure-line", "visibility", measure ? "visible" : "none");
     if (!measure) setPicks([]);
@@ -271,7 +289,8 @@ export default function MapView({
         geometry: { type: "LineString" as const, coordinates: [pointLngLat(a), pointLngLat(b)] },
       }] : [],
     };
-    (map.getSource("measure-line") as GeoJSONSource).setData(data);
+    const ms = map.getSource("measure-line") as GeoJSONSource | undefined;
+    if (ms) ms.setData(data);
   }, [picks, ready]);
 
   useEffect(() => {
@@ -314,7 +333,9 @@ export default function MapView({
           <p className="mp-note">{t(lang, "measureNote")}</p>
         </div>
       )}
-      <div className="map3d-hint">軌間1,067mm（模式）・ドラッグで回転、ホイールで拡大。点をクリック（km {Math.round(KM_MIN / 100) / 10}k–{Math.round(KM_MAX / 100) / 10}k）</div>
+      <div className="map3d-hint">{koma
+        ? "高麗川橋梁（八高線）・35.909N / 139.334E・実在サイト（点群は相対スケール）"
+        : <>軌間1,067mm（模式）・ドラッグで回転、ホイールで拡大。点をクリック（km {Math.round(KM_MIN / 100) / 10}k–{Math.round(KM_MAX / 100) / 10}k）</>}</div>
     </div>
   );
 }

@@ -11,12 +11,9 @@ import numpy as np
 from .config import DATA
 
 SITES: dict[str, dict] = {
-    "b14": {"dir": "demo", "name": "B-14 合成点群", "kind": "synthetic"},
     "koma_bridge": {"dir": "koma_bridge", "name": "高麗川橋梁（八高線）", "kind": "real"},
-    "koma_sfm": {"dir": "koma_sfm", "name": "高麗川橋梁（Mapillary SfM）", "kind": "projected"},
-    "koma_vggt3": {"dir": "koma_vggt3", "name": "高麗川橋梁（VGG-T³）", "kind": "model"},
 }
-DEFAULT_SITE = os.environ.get("POINTCLOUD_SITE", "b14")
+DEFAULT_SITE = os.environ.get("POINTCLOUD_SITE", "koma_bridge")
 _CACHE: dict[str, tuple] = {}
 
 
@@ -37,7 +34,7 @@ def site_info(site: str | None) -> dict:
 
 
 def sites() -> list[dict]:
-    keys = ["b14", "koma_bridge", "koma_sfm", "koma_vggt3"]
+    keys = ["koma_bridge"]
     return [site_info(k) for k in keys if (pc_dir(k) / "meta.json").exists()]
 
 

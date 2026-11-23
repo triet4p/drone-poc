@@ -18,7 +18,7 @@ from PIL import Image, ImageOps
 from pydantic import BaseModel, Field
 from .config import (BASE, DATA, UPLOADS, PREVIEWS, ORIGINALS, THUMBS, DB, DIST,
                      MODEL_ID, THRESHOLD, CLASSES, MAX_BYTES, LABEL_JA)
-from .db import db, now, init_db, audit, seed_assets, seed_demo
+from .db import db, now, init_db, audit, seed_assets, seed_demo, seed_koma_pointcloud_image
 from .inference import ensure_model, run_job, is_loaded
 from .schemas import JudgementIn, ImagePatch, PointPick
 from . import pointcloud
@@ -30,6 +30,7 @@ app = FastAPI(title="Drone Inspection API")
 def startup():
     init_db()
     seed_demo()
+    seed_koma_pointcloud_image()
     threading.Thread(target=lambda: ensure_model(), daemon=True).start()
 
 

@@ -61,7 +61,8 @@ def init_db() -> None:
         # additive migration for DBs created by the previous build
         cols = {r[1] for r in con.execute("PRAGMA table_info(image)")}
         for name, ddl in [("preview", "TEXT"), ("original", "TEXT"), ("license", "TEXT NOT NULL DEFAULT 'unknown'"),
-                          ("structure_id", "TEXT"), ("member_id", "TEXT"), ("attribution", "TEXT")]:
+                          ("structure_id", "TEXT"), ("member_id", "TEXT"), ("attribution", "TEXT"),
+                          ("site_id", "TEXT")]:
             if name not in cols:
                 con.execute(f"ALTER TABLE image ADD COLUMN {name} {ddl}")
 
@@ -141,6 +142,32 @@ def seed_demo():
                 con.execute("INSERT INTO detection(image_id,label,score,box_json,model,created_at) VALUES(?,?,?,?,?,?)",
                             (iid, d["label"], d["score"], json.dumps(box), man["model"], now()))
         audit(con, "seed", "demo", str(len(man["images"])), "legacy demo dataset")
+
+
+def seed_koma_pointcloud_image() -> None:
+    """One real Koma frame in the review list, explicitly site-scoped.
+
+    This is the bridge between the image list and the real Koma package. It is not a
+    B-14 image and must not inherit a B-14 point cloud.
+    """
+    src = DATA / "pointcloud" / "koma_bridge" / "photos" / "video-00021.jpg"
+    if not src.exists():
+        return
+    with db() as con:
+        con.execute("UPDATE image SET site_id='b14' WHERE structure_id='B14' AND site_id IS NULL")
+        if con.execute("SELECT 1 FROM image WHERE site_id='koma_bridge' LIMIT 1").fetchone():
+            return
+        iid = "koma001"
+        w, h = normalize(Image.open(src), iid)
+        orig = ORIGINALS / f"{iid}.jpg"
+        orig.write_bytes(src.read_bytes())
+        con.execute("""INSERT INTO image(id,filename,stored,preview,original,sha256,width,height,km_m,
+                       structure_id,member_id,license,attribution,source,created_at,site_id)
+                       VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+                    (iid, "koma_bridge_video.jpg", f"{iid}.jpg", f"{iid}.jpg", orig.name,
+                     hashlib.sha256(src.read_bytes()).hexdigest(), w, h, None, None, None,
+                     "cc-by", "Izumi5 / CC BY 3.0", "reference", now(), "koma_bridge"))
+        audit(con, "seed", "reference", "koma_bridge", "Koma point-cloud sample image")
 
 
 # ---------- api ----------

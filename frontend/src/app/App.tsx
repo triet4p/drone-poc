@@ -15,7 +15,7 @@ type Detection = {
 };
 type ImageRow = {
   id: string; filename: string; width: number; height: number;
-  km_m: number | null; structure_id: string | null; member_id: string | null;
+  km_m: number | null; structure_id: string | null; member_id: string | null; site_id: string | null;
   structure_name: string | null; member_name: string | null; license: string;
   source: string; attribution?: string | null; detections: Detection[]; thumb: string;
 };
@@ -94,7 +94,7 @@ export default function App() {
   const [data, setData] = useState<State | null>(null);
   const [assets, setAssets] = useState<Structure[]>([]);
   const [imgId, setImgId] = useState<string | null>(null);
-  const [pcSite, setPcSite] = useState<string | null>(null);
+
   const [detId, setDetId] = useState<number | null>(null);
   const [filter, setFilter] = useState<"all" | "open" | "done">("all");
   const [rank, setRank] = useState<string | null>(null);
@@ -177,8 +177,7 @@ export default function App() {
   }, [running.length, refresh]);
 
   const image = data?.images.find((i) => i.id === imgId) ?? null;
-  const imageSite = image?.structure_id === "B14" ? "b14" : null;
-  useEffect(() => { setPcSite(imageSite); }, [imgId, imageSite]);
+  const imageSite = image?.site_id ?? null;
   const det = image?.detections.find((d) => d.id === detId) ?? null;
 
   useEffect(() => {
@@ -323,11 +322,13 @@ export default function App() {
     else notify(tr("allDone"));
   };
 
-  const shown = (data?.images ?? []).filter((im) =>
-    filter === "all" ? true :
-    filter === "open" ? im.detections.some((d) => !d.judgement) :
-    im.detections.some((d) => d.judgement)
-  );
+  const shown = (data?.images ?? [])
+    .filter((im) => imageSite != null && im.site_id === imageSite)
+    .filter((im) =>
+      filter === "all" ? true :
+      filter === "open" ? im.detections.some((d) => !d.judgement) :
+      im.detections.some((d) => d.judgement)
+    );
 
   const structures = assets;
   const members = structures.find((s) => s.id === edit.structure_id)?.members ?? [];
@@ -339,7 +340,9 @@ export default function App() {
       <a className="skip-link" href="#main">本文へスキップ</a>
       <header className="dws-topbar appbar">
         <div className="brand"><span className="mark">軌</span><span className="brand-name">{tr("appTitle")}</span><span className="tag">{tr("appTag")}</span></div>
-        <div className="ctx"><b>{tr("ctxLine")}</b>　12k400–15k600　{tr("ctxPeriod")}</div>
+        <div className="ctx">{imageSite === "koma_bridge"
+          ? <><b>高麗川橋梁（八高線）</b>　35.909N / 139.334E　11/2026</>
+          : <><b>{tr("ctxLine")}</b>　12k400–15k600　{tr("ctxPeriod")}</>}</div>
         <div className="spacer" />
         <div className="lang" role="group" aria-label={tr("language")}>
           {LANGS.map((l) => (
@@ -426,7 +429,11 @@ export default function App() {
           <div className="list-head">
             <h2>{tr("listTitle")}</h2>
             <div className="counts">
-              {data ? tr("counts", { i: data.counts.images, c: data.counts.candidates, f: data.counts.confirmed }) : tr("loading")}
+              {data ? tr("counts", {
+                i: shown.length,
+                c: shown.reduce((n, im) => n + im.detections.length, 0),
+                f: shown.reduce((n, im) => n + im.detections.filter((d) => d.judgement).length, 0),
+              }) : tr("loading")}
             </div>
             <div className="chips" role="group">
               {(["all", "open", "done"] as const).map((f) => (
@@ -470,9 +477,9 @@ export default function App() {
             {image && <a className="mini-link" href={`/api/original/${image.id}`} target="_blank" rel="noreferrer">{tr("original")}</a>}
           </div>
           {mode === "point" ? (
-            <PointCloudView lang={lang} siteId={pcSite} onSite={setPcSite} />
+            <PointCloudView lang={lang} siteId={imageSite} />
           ) : mode !== "photo" ? (
-            <MapView images={data?.images ?? []} selectedId={imgId} lang={lang}
+            <MapView images={data?.images ?? []} selectedId={imgId} lang={lang} siteId={imageSite}
               measure={mode === "measure"} onSelect={(id) => setImgId(id)} />
           ) : (
           <div className="stage-wrap" ref={wrapRef}
@@ -519,14 +526,16 @@ export default function App() {
             <span>{tr("hint")}</span>
             <span>{image?.source === "demo" ? tr("demo") : image?.source === "reference" ? tr("reference") : image ? tr("uploaded") : ""}</span>
           </div>
-          <div className="strip-wrap">
-            <div className="strip-title">{tr("stripTitle")}</div>
-            <Strip assets={assets} images={data?.images ?? []} onPick={setImgId} />
-          </div>
+          {imageSite !== "koma_bridge" && (
+            <div className="strip-wrap">
+              <div className="strip-title">{tr("stripTitle")}</div>
+              <Strip assets={assets} images={data?.images ?? []} onPick={setImgId} />
+            </div>
+          )}
         </section>
 
         <aside className="panel detail">
-          {image && (
+          {image && imageSite !== "koma_bridge" && (
             <section className="loc">
               <h3>{tr("locTitle")}</h3>
               <div className="loc-grid">
@@ -606,6 +615,7 @@ export default function App() {
           )}
         </aside>
 
+        {imageSite !== "koma_bridge" && (
         <section className="panel rail-context" aria-label={tr("railTitle")}>
           <div className="rc-head">
             <h3>{tr("railTitle")}</h3>
@@ -621,6 +631,7 @@ export default function App() {
             ))}
           </div>
         </section>
+        )}
       </div>
       )}
 
