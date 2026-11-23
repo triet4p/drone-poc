@@ -57,6 +57,7 @@ def main() -> None:
             pose_enc = model.camera_head(aggregated)[-1]
             extrinsic, intrinsic = pose_encoding_to_extri_intri(pose_enc, imgs.shape[-2:])
             depth, conf = model.depth_head(aggregated, imgs, ps_idx)
+    original_coords_np = original_coords.cpu().numpy()
     depth = depth.squeeze(0).float().cpu().numpy()
     conf = conf.squeeze(0).float().cpu().numpy()
     extrinsic = extrinsic.squeeze(0).cpu().numpy()
@@ -94,6 +95,8 @@ def main() -> None:
         xs = np.arange(0, c.shape[1], stride)
         yy, xx = np.meshgrid(ys, xs, indexing="ij")
         valid = np.isfinite(c[yy, xx]) & (c[yy, xx] >= thresh)
+        x1, y1, x2, y2 = original_coords_np[i][:4]
+        valid &= (xx >= x1 + 2) & (xx < x2 - 2) & (yy >= y1 + 2) & (yy < y2 - 2)
         yy, xx = yy[valid], xx[valid]
         if len(yy) > args.max_per_frame:
             take = np.linspace(0, len(yy) - 1, args.max_per_frame).astype(int)
@@ -102,6 +105,8 @@ def main() -> None:
         cols = img_np[i][yy, xx]
         for (x, y, p3, col) in zip(xx, yy, pts, cols):
             if not np.all(np.isfinite(p3)):
+                continue
+            if float(col.mean()) < 12:
                 continue
             rows.append([float(p3[0]), float(p3[1]), float(p3[2]),
                          float(col[0]), float(col[1]), float(col[2]), 255.0])

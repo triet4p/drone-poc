@@ -117,7 +117,7 @@ export default function PointCloudView({ lang }: { lang: Lang }) {
         });
         points = new THREE.Points(geo, material);
         scene.add(points);
-        if (m.link_method === "colmap_track" && geo.boundingSphere) {
+        if (m.link_method && geo.boundingSphere) {
           const sphere = geo.boundingSphere;
           const radius = Math.max(sphere.radius, 1);
           controls.target.copy(sphere.center);

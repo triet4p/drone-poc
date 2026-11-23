@@ -73,3 +73,25 @@ If COLMAP produces a degenerate or empty model on another site:
    result `link_method=projected_unverified`; learned pointmaps do not provide observed
    track pixels, so their click-to-photo link needs a separate projection/visibility
    check.
+
+## 6. Mapillary trial results
+
+- API coverage around Koma River Bridge (200 m bbox): **87 perspective images**
+  across 7 sequences, real train-cab/rail views. Nebukawa 200 m bbox: **0**; Tokyo:
+  100+. Coverage is location-dependent.
+- COLMAP on one 33-image sequence (`9yB9GtaVRQ6fQPNGBWmw9Q`): mapper failed to create
+  a model (`colmap mapper` exit 1); matching finished but no usable initialization.
+  This is recorded as a failed attempt, not a hidden result.
+- VGGT fallback (16 evenly spaced frames from that sequence, 518 px, VGGT-1B,
+  RTX 4060 Ti 16 GB):
+  - device CUDA, dtype bfloat16; peak observed GPU ~15.3 GB;
+  - 16 frames, **48,000 pointmap points**, each retaining its source pixel;
+  - runtime ~128 s after model load;
+  - package: `data/pointcloud/koma_vggt/`, `link_method=vggt_pointmap`,
+    `scale_status=relative`, 16 frames;
+  - limitation: the pointmap cloud collapses into a narrow corridor/line; it is a
+    technical fallback for source-pixel linkage, not a replacement for the COLMAP
+    package. No multi-view reprojection gate is claimed.
+- Conclusion: Mapillary is a viable **discovery/coverage** provider where sequences exist,
+  and a viable VGGT input; for this site, COLMAP on the continuous video is the better
+  geometry package.

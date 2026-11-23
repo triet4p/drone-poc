@@ -33,6 +33,10 @@ It is not a claim that public imagery can reconstruct every location.
 
 ## 3. CLI
 
+Adapters implemented: Commons (`commons.py`), video (`video.py`), Mapillary
+(`mapillary.py`, token from env/.env, never logged), COLMAP/package (`colmap.py`),
+VGGT fallback (`vggt_export.py`).
+
 The implementation lives under `backend/app/modules/rail/`:
 
 ```bash
@@ -47,8 +51,20 @@ python -m backend.app.modules.rail.cli reconstruct \
   --work data/rail/yokokawa \
   --out data/pointcloud/yokokawa
 
+python -m backend.app.modules.rail.cli acquire-video \
+  --site-id koma_bridge --video data/real/kiha_koma.mkv --crop 440:460:440:100
+
+python -m backend.app.modules.rail.cli acquire-mapillary \
+  --site-id koma_bridge --lat 35.908963 --lon 139.33398 --radius-m 200
+
 python -m backend.app.modules.rail.cli inspect \
-  --site-id yokokawa --work data/rail/yokokawa
+  --site-id yokokawa --work data/rail/yokokawa --out data/pointcloud/yokokawa
+
+# fallback only after COLMAP fails
+python -m backend.app.modules.rail.vggt_export \
+  --images-dir data/rail/koma_vggt/photos \
+  --manifest data/rail/koma_vggt/manifest.json \
+  --out data/pointcloud/koma_vggt --site-id koma_vggt
 ```
 
 For a coordinate query, `acquire --lat … --lon … --radius-m …` uses Commons geosearch.
