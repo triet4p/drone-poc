@@ -102,6 +102,7 @@ def _pick_observation(index: int, top_k: int):
         "link_method": m.get("link_method", "colmap_track"),
         "color": [int(row[3]), int(row[4]), int(row[5])],
         "local": {"x": round(float(row[0]), 3), "y": round(float(row[1]), 3), "z": round(float(row[2]), 3)},
+        "observation_count": end - start,
         "views": out[:top_k],
     }
 

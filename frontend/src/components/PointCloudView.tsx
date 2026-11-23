@@ -6,6 +6,7 @@ import { t, type Lang } from "../lib/i18n";
 type View = { image_id: string; url: string; u: number; v: number; depth?: number; width: number; height: number; score: number; residual?: number; source_url?: string; captured_at?: string; license?: string; artist?: string };
 type Pick = {
   index: number; member: string; site?: string; scale_status?: string; link_method?: string;
+  observation_count?: number;
   km?: number; local?: { x: number; y: number; z: number };
   metrics?: { rail_offset_m: number; height_vs_rail_m: number; scale_status: string };
   views: View[];
@@ -30,6 +31,9 @@ export default function PointCloudView({ lang }: { lang: Lang }) {
   const [showPhoto, setShowPhoto] = useState(true);
   const [showDense, setShowDense] = useState(true);
   const denseRef = useRef<THREE.Points | null>(null);
+  const [pointSize, setPointSize] = useState(1);
+  const [pointOpacity, setPointOpacity] = useState(1);
+  const baseSizeRef = useRef(1);
 
   useEffect(() => {
     let disposed = false;
@@ -138,7 +142,7 @@ export default function PointCloudView({ lang }: { lang: Lang }) {
         geo.setAttribute("color", new THREE.BufferAttribute(col, 3));
         geo.computeBoundingSphere();
         const material = new THREE.PointsMaterial({
-          size: 0.075, vertexColors: true, sizeAttenuation: true,
+          size: 0.075, vertexColors: true, sizeAttenuation: true, transparent: true, opacity: 1,
         });
         points = new THREE.Points(geo, material);
         pointsRef.current = points;
@@ -185,7 +189,8 @@ export default function PointCloudView({ lang }: { lang: Lang }) {
           camera.updateProjectionMatrix();
           controls.update();
           cloudRadius = radius;
-          material.size = Math.max(radius * 0.004, 0.002);
+          material.size = Math.max(radius * 0.02, 0.01);
+          baseSizeRef.current = material.size;
           raycaster.params.Points = { threshold: Math.max(radius * 0.012, 0.005) };
           grid.visible = false;
           axes.visible = false;
@@ -245,7 +250,20 @@ export default function PointCloudView({ lang }: { lang: Lang }) {
           const next = !showDense; setShowDense(next);
           if (denseRef.current) denseRef.current.visible = next;
         }}>{t(lang, "pcDense")}</button> : null}
+        <label className="pc-slider">{t(lang, "pcSize")}
+          <input type="range" min="0.5" max="3" step="0.1" value={pointSize} onChange={(e) => {
+            const v = Number(e.target.value); setPointSize(v);
+            if (pointsRef.current) (pointsRef.current.material as THREE.PointsMaterial).size = baseSizeRef.current * v;
+          }} />
+        </label>
+        <label className="pc-slider">{t(lang, "pcOpacity")}
+          <input type="range" min="0.2" max="1" step="0.05" value={pointOpacity} onChange={(e) => {
+            const v = Number(e.target.value); setPointOpacity(v);
+            if (pointsRef.current) (pointsRef.current.material as THREE.PointsMaterial).opacity = v;
+          }} />
+        </label>
       </div>
+      <div className="pc-sparse-note">{t(lang, "pcSparseNote")}</div>
       {loading && <div className="pc-loading">{t(lang, "loading")}</div>}
       {error && <div className="pc-error">{error}</div>}
       {sel && (
@@ -274,6 +292,7 @@ export default function PointCloudView({ lang }: { lang: Lang }) {
             ) : null}
             {sel.local ? <><dt>{t(lang, "pcLocal")}</dt><dd>X {sel.local.x} · Y {sel.local.y} · Z {sel.local.z}</dd></> : null}
             <dt>{t(lang, "pcScale")}</dt><dd>{t(lang, "pcScaleRelative")}</dd>
+            {sel.observation_count != null ? <><dt>{t(lang, "pcObservations")}</dt><dd>{sel.observation_count}</dd></> : null}
             {sel.link_method ? <><dt>{t(lang, "pcLinkMethod")}</dt><dd>{sel.link_method}</dd></> : null}
             {view?.residual != null ? <><dt>{t(lang, "pcResidual")}</dt><dd>{view.residual.toFixed(2)} px</dd></> : null}
           </dl>
