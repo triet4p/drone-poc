@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "gates": {
+    "points": true,
+    "frames": true
+  },
+  "stats": {
+    "registered_images": 16,
+    "points3d": 27437,
+    "observations": 27437,
+    "confidence_quantile": 0.5,
+    "pi4_scale": 2.8456265926361084,
+    "source": "Pi4 local pointmaps; one source pixel per point"
+  },
+  "note": "Pi4 fallback: no multi-view reprojection gate."
+}

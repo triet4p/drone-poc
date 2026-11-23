@@ -1,0 +1,378 @@
+{
+  "schema_version": 1,
+  "site_id": "koma_pi4",
+  "site_name": "高麗川橋梁（八高線・Pi4）",
+  "package_id": "koma_pi4-20261123T092932Z",
+  "created_at": "2026-11-23T09:29:32Z",
+  "count": 27437,
+  "members": [
+    "unknown"
+  ],
+  "units": "model units",
+  "scale_status": "relative",
+  "scale_note": "Pi4 predicted scale; no GCP verification.",
+  "link_method": "pi4_pointmap",
+  "note": "Pi4 pointmap from real source photographs. Each point opens its source pixel. Relative scale; not a survey.",
+  "site": {
+    "source": "pi4",
+    "queries": [
+      {
+        "provider": "video",
+        "file": "kiha_koma.mkv",
+        "start_s": 0.0,
+        "end_s": 55.037,
+        "every_s": 1.5,
+        "source_url": "https://www.youtube.com/watch?v=Cu7dfjXOVQY"
+      }
+    ]
+  },
+  "photos": [
+    {
+      "photo_id": "video-00001",
+      "provider": "video_frame",
+      "provider_id": "kiha_koma.mkv#0.000",
+      "title": "高麗川橋梁（八高線） frame 0",
+      "source_url": "https://www.youtube.com/watch?v=Cu7dfjXOVQY",
+      "file_url": "https://www.youtube.com/watch?v=Cu7dfjXOVQY",
+      "served_file": "photos/video-00001.jpg",
+      "width": 496,
+      "height": 512,
+      "sha256": "05e97519dca814fc63cb19860d0e653ae173e87d154f7f918cb1fc41fa517ac3",
+      "license": "CC BY 3.0",
+      "artist": "Izumi5",
+      "captured_at": "video t=0.00s"
+    },
+    {
+      "photo_id": "video-00005",
+      "provider": "video_frame",
+      "provider_id": "kiha_koma.mkv#6.000",
+      "title": "高麗川橋梁（八高線） frame 4",
+      "source_url": "https://www.youtube.com/watch?v=Cu7dfjXOVQY",
+      "file_url": "https://www.youtube.com/watch?v=Cu7dfjXOVQY",
+      "served_file": "photos/video-00005.jpg",
+      "width": 496,
+      "height": 512,
+      "sha256": "c6db6ae8ca1c7760f407939e4c69178063dfebc3f0320d6ea0802e3d215130c9",
+      "license": "CC BY 3.0",
+      "artist": "Izumi5",
+      "captured_at": "video t=6.00s"
+    },
+    {
+      "photo_id": "video-00007",
+      "provider": "video_frame",
+      "provider_id": "kiha_koma.mkv#9.000",
+      "title": "高麗川橋梁（八高線） frame 6",
+      "source_url": "https://www.youtube.com/watch?v=Cu7dfjXOVQY",
+      "file_url": "https://www.youtube.com/watch?v=Cu7dfjXOVQY",
+      "served_file": "photos/video-00007.jpg",
+      "width": 496,
+      "height": 512,
+      "sha256": "70af2bfee12b2db0402641927303428604aa8c9fcac406ad59bfb66e4d26017d",
+      "license": "CC BY 3.0",
+      "artist": "Izumi5",
+      "captured_at": "video t=9.00s"
+    },
+    {
+      "photo_id": "video-00008",
+      "provider": "video_frame",
+      "provider_id": "kiha_koma.mkv#10.500",
+      "title": "高麗川橋梁（八高線） frame 7",
+      "source_url": "https://www.youtube.com/watch?v=Cu7dfjXOVQY",
+      "file_url": "https://www.youtube.com/watch?v=Cu7dfjXOVQY",
+      "served_file": "photos/video-00008.jpg",
+      "width": 496,
+      "height": 512,
+      "sha256": "7c0581c03b554548b101767f6b1517cb65258c97176e1767613a26204189efa4",
+      "license": "CC BY 3.0",
+      "artist": "Izumi5",
+      "captured_at": "video t=10.50s"
+    },
+    {
+      "photo_id": "video-00011",
+      "provider": "video_frame",
+      "provider_id": "kiha_koma.mkv#15.000",
+      "title": "高麗川橋梁（八高線） frame 10",
+      "source_url": "https://www.youtube.com/watch?v=Cu7dfjXOVQY",
+      "file_url": "https://www.youtube.com/watch?v=Cu7dfjXOVQY",
+      "served_file": "photos/video-00011.jpg",
+      "width": 496,
+      "height": 512,
+      "sha256": "d25039b5264465e8e83d16d5d4b0d6f0178c3c5e2a46acac7d38f7c47285ac80",
+      "license": "CC BY 3.0",
+      "artist": "Izumi5",
+      "captured_at": "video t=15.00s"
+    },
+    {
+      "photo_id": "video-00013",
+      "provider": "video_frame",
+      "provider_id": "kiha_koma.mkv#18.000",
+      "title": "高麗川橋梁（八高線） frame 12",
+      "source_url": "https://www.youtube.com/watch?v=Cu7dfjXOVQY",
+      "file_url": "https://www.youtube.com/watch?v=Cu7dfjXOVQY",
+      "served_file": "photos/video-00013.jpg",
+      "width": 496,
+      "height": 512,
+      "sha256": "c3413c9d881f3aeb697c62776b48e20d8e7960d06bbc069d6c7be6cda2604dac",
+      "license": "CC BY 3.0",
+      "artist": "Izumi5",
+      "captured_at": "video t=18.00s"
+    },
+    {
+      "photo_id": "video-00016",
+      "provider": "video_frame",
+      "provider_id": "kiha_koma.mkv#22.500",
+      "title": "高麗川橋梁（八高線） frame 15",
+      "source_url": "https://www.youtube.com/watch?v=Cu7dfjXOVQY",
+      "file_url": "https://www.youtube.com/watch?v=Cu7dfjXOVQY",
+      "served_file": "photos/video-00016.jpg",
+      "width": 496,
+      "height": 512,
+      "sha256": "04a190df01f6f7ebe155fb35a3939b37bd213b1cca7f6e934782bdea92905044",
+      "license": "CC BY 3.0",
+      "artist": "Izumi5",
+      "captured_at": "video t=22.50s"
+    },
+    {
+      "photo_id": "video-00018",
+      "provider": "video_frame",
+      "provider_id": "kiha_koma.mkv#25.500",
+      "title": "高麗川橋梁（八高線） frame 17",
+      "source_url": "https://www.youtube.com/watch?v=Cu7dfjXOVQY",
+      "file_url": "https://www.youtube.com/watch?v=Cu7dfjXOVQY",
+      "served_file": "photos/video-00018.jpg",
+      "width": 496,
+      "height": 512,
+      "sha256": "f3674076bc1f812c660e9ff68d717d0da0fe7198416c3684dc5d8f0301d647c5",
+      "license": "CC BY 3.0",
+      "artist": "Izumi5",
+      "captured_at": "video t=25.50s"
+    },
+    {
+      "photo_id": "video-00020",
+      "provider": "video_frame",
+      "provider_id": "kiha_koma.mkv#28.500",
+      "title": "高麗川橋梁（八高線） frame 19",
+      "source_url": "https://www.youtube.com/watch?v=Cu7dfjXOVQY",
+      "file_url": "https://www.youtube.com/watch?v=Cu7dfjXOVQY",
+      "served_file": "photos/video-00020.jpg",
+      "width": 496,
+      "height": 512,
+      "sha256": "a2f1220dd04a1c320f84ed03b73ca24b43f988220b52153fe8f14b0a1fb5c550",
+      "license": "CC BY 3.0",
+      "artist": "Izumi5",
+      "captured_at": "video t=28.50s"
+    },
+    {
+      "photo_id": "video-00022",
+      "provider": "video_frame",
+      "provider_id": "kiha_koma.mkv#31.500",
+      "title": "高麗川橋梁（八高線） frame 21",
+      "source_url": "https://www.youtube.com/watch?v=Cu7dfjXOVQY",
+      "file_url": "https://www.youtube.com/watch?v=Cu7dfjXOVQY",
+      "served_file": "photos/video-00022.jpg",
+      "width": 496,
+      "height": 512,
+      "sha256": "4c9988d1d574aaeea0481c9649f6fc7f5bf46117cb088fd2b9000de53061888f",
+      "license": "CC BY 3.0",
+      "artist": "Izumi5",
+      "captured_at": "video t=31.50s"
+    },
+    {
+      "photo_id": "video-00024",
+      "provider": "video_frame",
+      "provider_id": "kiha_koma.mkv#34.500",
+      "title": "高麗川橋梁（八高線） frame 23",
+      "source_url": "https://www.youtube.com/watch?v=Cu7dfjXOVQY",
+      "file_url": "https://www.youtube.com/watch?v=Cu7dfjXOVQY",
+      "served_file": "photos/video-00024.jpg",
+      "width": 496,
+      "height": 512,
+      "sha256": "bd335b58dcb23deaf973273867798022a2af786eaf5ff4b0945fbfa7cffec374",
+      "license": "CC BY 3.0",
+      "artist": "Izumi5",
+      "captured_at": "video t=34.50s"
+    },
+    {
+      "photo_id": "video-00027",
+      "provider": "video_frame",
+      "provider_id": "kiha_koma.mkv#39.000",
+      "title": "高麗川橋梁（八高線） frame 26",
+      "source_url": "https://www.youtube.com/watch?v=Cu7dfjXOVQY",
+      "file_url": "https://www.youtube.com/watch?v=Cu7dfjXOVQY",
+      "served_file": "photos/video-00027.jpg",
+      "width": 496,
+      "height": 512,
+      "sha256": "62a70af53ee71eef1046d8f1e179aae6998bad9ce97bf6e4c48c3879e56c22e3",
+      "license": "CC BY 3.0",
+      "artist": "Izumi5",
+      "captured_at": "video t=39.00s"
+    },
+    {
+      "photo_id": "video-00028",
+      "provider": "video_frame",
+      "provider_id": "kiha_koma.mkv#40.500",
+      "title": "高麗川橋梁（八高線） frame 27",
+      "source_url": "https://www.youtube.com/watch?v=Cu7dfjXOVQY",
+      "file_url": "https://www.youtube.com/watch?v=Cu7dfjXOVQY",
+      "served_file": "photos/video-00028.jpg",
+      "width": 496,
+      "height": 512,
+      "sha256": "ee72df93ffa359ce1a49b5ca8b0a94ad5cc7e89d5075b0923cf606a80d7005fd",
+      "license": "CC BY 3.0",
+      "artist": "Izumi5",
+      "captured_at": "video t=40.50s"
+    },
+    {
+      "photo_id": "video-00030",
+      "provider": "video_frame",
+      "provider_id": "kiha_koma.mkv#43.500",
+      "title": "高麗川橋梁（八高線） frame 29",
+      "source_url": "https://www.youtube.com/watch?v=Cu7dfjXOVQY",
+      "file_url": "https://www.youtube.com/watch?v=Cu7dfjXOVQY",
+      "served_file": "photos/video-00030.jpg",
+      "width": 496,
+      "height": 512,
+      "sha256": "c40c24c3a8f3670a1da7326d899fe586b3de83e4076bd6dc3d29311298263cd0",
+      "license": "CC BY 3.0",
+      "artist": "Izumi5",
+      "captured_at": "video t=43.50s"
+    },
+    {
+      "photo_id": "video-00033",
+      "provider": "video_frame",
+      "provider_id": "kiha_koma.mkv#48.000",
+      "title": "高麗川橋梁（八高線） frame 32",
+      "source_url": "https://www.youtube.com/watch?v=Cu7dfjXOVQY",
+      "file_url": "https://www.youtube.com/watch?v=Cu7dfjXOVQY",
+      "served_file": "photos/video-00033.jpg",
+      "width": 496,
+      "height": 512,
+      "sha256": "470320e3044107141619fa49c0b4744e149015c00e41e45c81fafd91f1ed8b74",
+      "license": "CC BY 3.0",
+      "artist": "Izumi5",
+      "captured_at": "video t=48.00s"
+    },
+    {
+      "photo_id": "video-00035",
+      "provider": "video_frame",
+      "provider_id": "kiha_koma.mkv#51.000",
+      "title": "高麗川橋梁（八高線） frame 34",
+      "source_url": "https://www.youtube.com/watch?v=Cu7dfjXOVQY",
+      "file_url": "https://www.youtube.com/watch?v=Cu7dfjXOVQY",
+      "served_file": "photos/video-00035.jpg",
+      "width": 496,
+      "height": 512,
+      "sha256": "79e4f3104bf61388101f5a068702cc456d4744966917e821a872410b0c7eaee8",
+      "license": "CC BY 3.0",
+      "artist": "Izumi5",
+      "captured_at": "video t=51.00s"
+    }
+  ],
+  "views": [
+    {
+      "id": "video-00001",
+      "file": "photos/video-00001.jpg",
+      "width": 496,
+      "height": 512
+    },
+    {
+      "id": "video-00005",
+      "file": "photos/video-00005.jpg",
+      "width": 496,
+      "height": 512
+    },
+    {
+      "id": "video-00007",
+      "file": "photos/video-00007.jpg",
+      "width": 496,
+      "height": 512
+    },
+    {
+      "id": "video-00008",
+      "file": "photos/video-00008.jpg",
+      "width": 496,
+      "height": 512
+    },
+    {
+      "id": "video-00011",
+      "file": "photos/video-00011.jpg",
+      "width": 496,
+      "height": 512
+    },
+    {
+      "id": "video-00013",
+      "file": "photos/video-00013.jpg",
+      "width": 496,
+      "height": 512
+    },
+    {
+      "id": "video-00016",
+      "file": "photos/video-00016.jpg",
+      "width": 496,
+      "height": 512
+    },
+    {
+      "id": "video-00018",
+      "file": "photos/video-00018.jpg",
+      "width": 496,
+      "height": 512
+    },
+    {
+      "id": "video-00020",
+      "file": "photos/video-00020.jpg",
+      "width": 496,
+      "height": 512
+    },
+    {
+      "id": "video-00022",
+      "file": "photos/video-00022.jpg",
+      "width": 496,
+      "height": 512
+    },
+    {
+      "id": "video-00024",
+      "file": "photos/video-00024.jpg",
+      "width": 496,
+      "height": 512
+    },
+    {
+      "id": "video-00027",
+      "file": "photos/video-00027.jpg",
+      "width": 496,
+      "height": 512
+    },
+    {
+      "id": "video-00028",
+      "file": "photos/video-00028.jpg",
+      "width": 496,
+      "height": 512
+    },
+    {
+      "id": "video-00030",
+      "file": "photos/video-00030.jpg",
+      "width": 496,
+      "height": 512
+    },
+    {
+      "id": "video-00033",
+      "file": "photos/video-00033.jpg",
+      "width": 496,
+      "height": 512
+    },
+    {
+      "id": "video-00035",
+      "file": "photos/video-00035.jpg",
+      "width": 496,
+      "height": 512
+    }
+  ],
+  "stats": {
+    "registered_images": 16,
+    "points3d": 27437,
+    "observations": 27437,
+    "confidence_quantile": 0.5,
+    "pi4_scale": 2.8456265926361084,
+    "source": "Pi4 local pointmaps; one source pixel per point"
+  },
+  "pipeline": "backend.app.modules.rail.pi4_export"
+}

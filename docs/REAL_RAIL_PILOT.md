@@ -142,3 +142,13 @@ If COLMAP produces a degenerate or empty model on another site:
   reconstruction.
 - Result is visibly a rail corridor/bridge surface, but sparse and low-density
   (source frames are 440×460); relative scale, no GCP.
+
+## 10. Pi4 trial
+
+- Installed Pi4 (`yyfz/Pi4`) with Python 3.11, PyTorch 2.12.1 + CUDA 12.6.
+- Input: 16 Koma frames, 512 px, geometry-only inference.
+- Result: **27,437 points**, 16 source frames, one source pixel per point;
+  `link_method=pi4_pointmap`, scale from Pi4 (`metric_scale≈2.8456`), labelled
+  `relative`, no multi-view reprojection gate.
+- Runtime ~89 s after model load; package `data/pointcloud/koma_pi4/`.
+- Not promoted to the primary demo; the COLMAP sparse+dense Koma package remains primary.

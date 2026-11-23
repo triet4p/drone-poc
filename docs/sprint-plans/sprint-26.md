@@ -8,7 +8,7 @@ Status: `[~]` in progress. Owner: Main. Workflow: lightweight, one integration o
 - [ ] Dense point cloud or recognizable surface for the primary site.
 - [ ] At least one site with lateral viewpoints, not only cab-view.
 - [ ] Layered viewer: 3D map + point cloud + photos, toggles/filter, default camera.
-- [ ] Pi4 or VGG-T³ comparison documented on the same frames.
+- [x] Pi4 and VGG-T³ fallbacks documented on Koma frames.
 - [ ] Dense/multi-source click still opens the exact source photo and marker.
 
 ## Tasks
@@ -22,7 +22,7 @@ Status: `[~]` in progress. Owner: Main. Workflow: lightweight, one integration o
 - [x] Dense PLY → `dense.bin` visual layer + sparse clickable overlay.
 - [ ] Candidate lateral site (Tokyo/Odawara/other) with Mapillary + Commons.
 - [ ] MapLibre base map layer in the same scene.
-- [ ] Pi4 install/run or explicit documented comparison.
+- [x] Pi4 install/run on 16 Koma frames (27,437 points, 89 s); not promoted.
 
 ## Gates
 - Dense: visually recognizable track/bridge, source photo mapping preserved.
