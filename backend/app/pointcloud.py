@@ -17,7 +17,7 @@ _obs = None
 
 
 def _load():
-    global _meta, _points, _depth
+    global _meta, _points, _depth, _obs
     if _meta is None:
         _meta = json.loads((PC / "meta.json").read_text(encoding="utf-8"))
         _points = np.memmap(PC / "points.bin", dtype=np.float32, mode="r").reshape(-1, 7)

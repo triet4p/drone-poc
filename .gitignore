@@ -16,5 +16,3 @@ data/real/
 .env
 data/demo.db-*
 data/demo/extra_out/
-data/pointcloud/*/photos/
-data/pointcloud/*/source_manifest.json

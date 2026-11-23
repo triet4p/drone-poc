@@ -300,8 +300,8 @@ def export_package(
         "scale_status": "relative",
         "scale_note": "No GCP or surveyed anchor in this pilot package.",
         "link_method": "colmap_track",
-        "note": "Photogrammetric sparse cloud from real Wikimedia Commons photographs. Relative scale; not a survey.",
-        "site": {"source": "wikimedia_commons", "queries": manifest.get("queries", [])},
+        "note": "Photogrammetric sparse cloud from real source photographs. Relative scale; not a survey.",
+        "site": {"source": (manifest.get("queries") or [{}])[0].get("provider", "unknown"), "queries": manifest.get("queries", [])},
         "photos": photo_order,
         "views": [
             {"id": p["photo_id"], "file": p["served_file"], "width": p["width"], "height": p["height"]}

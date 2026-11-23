@@ -8,6 +8,8 @@ from pathlib import Path
 
 from .commons import acquire
 from .colmap import export_package, run_colmap
+from .video import acquire_video
+from .mapillary import acquire_mapillary
 
 
 def cmd_acquire(args) -> None:
@@ -21,6 +23,40 @@ def cmd_acquire(args) -> None:
         radius_m=args.radius_m,
         max_width=args.width,
         limit=args.limit,
+        cached_dir=Path(args.cached_dir) if args.cached_dir else None,
+    )
+    print(json.dumps(manifest.get("counts"), ensure_ascii=False))
+
+
+def cmd_acquire_video(args) -> None:
+    manifest = acquire_video(
+        site_id=args.site_id,
+        site_name=args.site_name or args.site_id,
+        work=Path(args.work),
+        video=Path(args.video),
+        start=args.start,
+        end=args.end,
+        every_s=args.every,
+        width=args.width,
+        crop=args.crop,
+        source_url=args.source_url,
+        license=args.license,
+        artist=args.artist,
+    )
+    print(json.dumps(manifest.get("counts"), ensure_ascii=False))
+
+
+def cmd_acquire_mapillary(args) -> None:
+    manifest = acquire_mapillary(
+        site_id=args.site_id,
+        site_name=args.site_name or args.site_id,
+        work=Path(args.work),
+        lat=args.lat,
+        lon=args.lon,
+        radius_m=args.radius_m,
+        limit=args.limit,
+        width=args.width,
+        env_file=Path(args.env_file) if args.env_file else None,
         cached_dir=Path(args.cached_dir) if args.cached_dir else None,
     )
     print(json.dumps(manifest.get("counts"), ensure_ascii=False))
@@ -78,6 +114,34 @@ def main(argv: list[str] | None = None) -> int:
     a.add_argument("--limit", type=int, default=None)
     a.add_argument("--cached-dir", default=None)
     a.set_defaults(func=cmd_acquire)
+
+    v = sub.add_parser("acquire-video")
+    v.add_argument("--site-id", required=True)
+    v.add_argument("--site-name", default="")
+    v.add_argument("--work", required=True)
+    v.add_argument("--video", required=True)
+    v.add_argument("--start", type=float, default=0.0)
+    v.add_argument("--end", type=float, default=None)
+    v.add_argument("--every", type=float, default=1.5)
+    v.add_argument("--width", type=int, default=1600)
+    v.add_argument("--crop", default=None, help="ffmpeg crop w:h:x:y")
+    v.add_argument("--source-url", default="")
+    v.add_argument("--license", default="")
+    v.add_argument("--artist", default="")
+    v.set_defaults(func=cmd_acquire_video)
+
+    m = sub.add_parser("acquire-mapillary")
+    m.add_argument("--site-id", required=True)
+    m.add_argument("--site-name", default="")
+    m.add_argument("--work", required=True)
+    m.add_argument("--lat", type=float, required=True)
+    m.add_argument("--lon", type=float, required=True)
+    m.add_argument("--radius-m", type=int, default=200)
+    m.add_argument("--limit", type=int, default=100)
+    m.add_argument("--width", type=int, default=1600)
+    m.add_argument("--env-file", default=".env")
+    m.add_argument("--cached-dir", default=None)
+    m.set_defaults(func=cmd_acquire_mapillary)
 
     r = sub.add_parser("reconstruct")
     r.add_argument("--site-id", required=True)

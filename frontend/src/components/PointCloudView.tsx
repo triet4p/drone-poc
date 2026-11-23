@@ -59,7 +59,8 @@ export default function PointCloudView({ lang }: { lang: Lang }) {
     const gm = grid.material as THREE.Material;
     gm.transparent = true; gm.opacity = 0.22;
     scene.add(grid);
-    scene.add(new THREE.AxesHelper(20));
+    const axes = new THREE.AxesHelper(20);
+    scene.add(axes);
 
     const raycaster = new THREE.Raycaster();
     raycaster.params.Points = { threshold: 0.25 };
@@ -121,17 +122,18 @@ export default function PointCloudView({ lang }: { lang: Lang }) {
           const radius = Math.max(sphere.radius, 1);
           controls.target.copy(sphere.center);
           camera.position.set(
-            sphere.center.x + radius * 1.2,
-            sphere.center.y - radius * 1.7,
-            sphere.center.z + radius * 1.05,
+            sphere.center.x + radius * 0.75,
+            sphere.center.y - radius * 1.05,
+            sphere.center.z + radius * 0.6,
           );
           camera.near = Math.max(radius / 1000, 0.01);
           camera.far = radius * 100;
           camera.updateProjectionMatrix();
           controls.update();
-          material.size = Math.max(radius * 0.0022, 0.002);
-          raycaster.params.Points = { threshold: Math.max(radius * 0.008, 0.01) };
+          material.size = Math.max(radius * 0.009, 0.01);
+          raycaster.params.Points = { threshold: Math.max(radius * 0.02, 0.02) };
           grid.visible = false;
+          axes.visible = false;
         }
         setLoading(false);
       })
