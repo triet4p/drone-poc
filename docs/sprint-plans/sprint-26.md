@@ -18,8 +18,8 @@ Status: `[~]` in progress. Owner: Main. Workflow: lightweight, one integration o
 - [x] VGG-T³ 16-frame fallback package.
 - [x] UI selected-point highlight, local coords, reset, layer toggles.
 - [x] Robust percentile camera framing; dense layer hooks.
-- [~] COLMAP CUDA build → dense Koma MVS.
-- [ ] Dense PLY → `dense.bin` visual layer + sparse clickable overlay.
+- [x] COLMAP CUDA build → dense Koma MVS.
+- [x] Dense PLY → `dense.bin` visual layer + sparse clickable overlay.
 - [ ] Candidate lateral site (Tokyo/Odawara/other) with Mapillary + Commons.
 - [ ] MapLibre base map layer in the same scene.
 - [ ] Pi4 install/run or explicit documented comparison.

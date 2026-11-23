@@ -127,3 +127,18 @@ If COLMAP produces a degenerate or empty model on another site:
     not promoted to the rail demo.
 - This proves the service works and is reusable; site/cluster selection needs a cluster
   whose shots actually observe the rail structure.
+
+## 9. Dense Koma layer (COLMAP CUDA)
+
+- Built COLMAP 3.11.1 with CUDA 12.1 and GCC 12 on the server.
+- Dense pipeline on the 34 registered Koma frames:
+  - `image_undistorter` (max 1000 px)
+  - `patch_match_stereo` geometric, **4.2 min**
+  - `stereo_fusion` → **43,750 fused points**
+- Converted to `data/pointcloud/koma_bridge/dense.bin`; the viewer exposes
+  **高密度 / Dense** as a separate layer.
+- Sparse 993-point COLMAP tracks remain the **clickable** layer; dense is visual
+  context only. Sparse coordinates and dense coordinates come from the same
+  reconstruction.
+- Result is visibly a rail corridor/bridge surface, but sparse and low-density
+  (source frames are 440×460); relative scale, no GCP.
