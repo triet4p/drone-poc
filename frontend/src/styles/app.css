@@ -339,7 +339,7 @@ body { font-size: 13px; line-height: 18px; }
 
 .attr { font-size: 10.5px; color: var(--dws-text-muted); margin: 6px 0 0; line-height: 1.5; }
 
-.pointcloud { position: relative; height: min(58vh, 560px); background: #11171c; overflow: hidden; }
+.pointcloud { position: relative; height: min(58vh, 560px); background: #1b252c; overflow: hidden; }
 .pc-canvas { position: absolute; inset: 0; }
 .pc-badge { position: absolute; left: 10px; top: 10px; background: rgba(17,23,28,.86); color: #e8ecf0;
   border: 1px solid #37444f; border-radius: 4px; padding: 3px 8px; font-size: 11.5px; }
@@ -359,7 +359,7 @@ body { font-size: 13px; line-height: 18px; }
   background: var(--dws-danger); transform: translate(-50%,-50%); box-shadow: 0 0 0 2px rgba(0,0,0,.5); }
 .pc-viewrow { display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap; }
 .pc-note { font-size: 10.5px; color: var(--dws-text-muted); margin: 6px 0 0; line-height: 1.5; }
-.pc-layers { position: absolute; left: 10px; top: 42px; display: flex; gap: 4px; }
+.pc-layers { position: absolute; left: 10px; top: 42px; display: flex; gap: 4px; flex-wrap: wrap; max-width: min(760px, calc(100% - 20px)); }
 .pc-layers .chip { background: rgba(17,23,28,.86); color: #d8dee4; border: 1px solid #37444f; }
 .pc-layers .chip[aria-pressed="true"] { border-color: var(--dws-accent); color: #fff; }
 .pc-source-meta { font-size: 10px; color: var(--dws-text-muted); margin-top: 4px; overflow-wrap: anywhere; }
@@ -391,3 +391,20 @@ body { font-size: 13px; line-height: 18px; }
 .layout.point-layout .spatial-view { height: calc(100vh - 250px); min-height: 520px; }
 .layout.point-layout .spatial-view .pointcloud { height: 100%; }
 @media (max-width: 720px) { .spatial-view { height: 46vh; } }
+
+.pc-presets { position: absolute; left: 10px; bottom: 62px; display: flex; gap: 4px; z-index: 3; }
+.pc-presets .chip { background: rgba(17,23,28,.86); color: #d8dee4; border: 1px solid #37444f; }
+.pc-presets .chip:hover { border-color: #39d5ff; }
+.pc-legend { position: absolute; left: 10px; top: 88px; z-index: 3; display: flex; flex-direction: column; gap: 3px;
+  background: rgba(17,23,28,.82); color: #d8dee4; border: 1px solid #37444f; border-radius: 5px;
+  padding: 5px 8px; font-size: 10.5px; line-height: 1.35; }
+.pc-legend span { display: flex; align-items: center; gap: 5px; }
+.pc-legend i { width: 10px; height: 3px; display: inline-block; border-radius: 1px; }
+.pc-legend i.lg-ground { background: #6e8087; }
+.pc-legend i.lg-rail { background: #39d5ff; }
+.pc-legend i.lg-high { background: #f5ad3c; }
+.pc-legend em { color: #8f9aa4; font-style: normal; font-size: 9.5px; max-width: 190px; }
+.pc-context { position: absolute; right: 10px; bottom: 10px; z-index: 3; width: 184px;
+  background: rgba(17,23,28,.9); border: 1px solid #37444f; border-radius: 5px; padding: 3px; }
+.pc-context img { display: block; width: 100%; height: 96px; object-fit: cover; border-radius: 3px; }
+.pc-context span { display: block; color: #b3bbc2; font-size: 9.5px; padding: 3px 2px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
